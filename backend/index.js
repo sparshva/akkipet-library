@@ -10,7 +10,6 @@ import userRouter from "./routes/user.js";
 import orderRouter from "./routes/order.js";
 
 app.use(express.json());
-app.options("*", cors());
 app.use(
   cors({
     credentials: true,
