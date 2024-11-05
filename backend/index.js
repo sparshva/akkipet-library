@@ -30,7 +30,10 @@ const connectDb = async () => {
 
 connectDb();
 
-app.get("/", (req, res) => {});
+app.get("/", (req, res) => {
+  console.log("Hello world");
+  res.send("Hello, world!"); // Send response to the client
+});
 
 app.use("/books", booksRouter);
 
