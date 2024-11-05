@@ -75,7 +75,6 @@ export const getBooksByFilterRequest = async (req, res) => {
 
   console.log("Filters:", filters);
 
-  // Check if any filter exists
   const hasFilters =
     filters.searchTerm ||
     (filters.authors && filters.authors.length > 0) ||
