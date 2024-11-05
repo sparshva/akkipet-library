@@ -12,7 +12,6 @@ import orderRouter from "./routes/order.js";
 app.use(express.json());
 app.use(
   cors({
-    credentials: true,
     origin: "*",
     optionsSuccessStatus: 200,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
