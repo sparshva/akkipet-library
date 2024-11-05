@@ -10,6 +10,10 @@ import userRouter from "./routes/user.js";
 import orderRouter from "./routes/order.js";
 
 app.use(express.json());
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  next();
+});
 app.use(
   cors({
     credentials: true,
@@ -19,10 +23,10 @@ app.use(
   })
 );
 
-app.use((req, res, next) => {
-  console.log(`${req.method} request for ${req.url}`);
-  next();
-});
+// app.use((req, res, next) => {
+//   console.log(`${req.method} request for ${req.url}`);
+//   next();
+// });
 
 const connectDb = async () => {
   try {
