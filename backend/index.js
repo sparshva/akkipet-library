@@ -10,23 +10,20 @@ import userRouter from "./routes/user.js";
 import orderRouter from "./routes/order.js";
 
 app.use(express.json());
-// app.use((req, res, next) => {
-//   res.header("Access-Control-Allow-Origin", "*");
-//   next();
-// });
-app.use(
-  cors({
-    credentials: true,
-    origin: "*",
-    optionsSuccessStatus: 200,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  })
-);
+// app.use(
+//   cors({
+//     credentials: true,
+//     origin: "http://localhost:3000",
+//     optionsSuccessStatus: 200,
+//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+//   })
+// );
+app.options("*", cors());
 
-// app.use((req, res, next) => {
-//   console.log(`${req.method} request for ${req.url}`);
-//   next();
-// });
+app.use((req, res, next) => {
+  console.log(`${req.method} request for ${req.url}`);
+  next();
+});
 
 const connectDb = async () => {
   try {
