@@ -14,7 +14,7 @@ app.options("*", cors());
 app.use(
   cors({
     credentials: true,
-    origin: true,
+    origin: "http://localhost:3000",
     optionsSuccessStatus: 200,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   })
