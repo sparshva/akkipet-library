@@ -18,12 +18,7 @@ app.use(express.json());
 //     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 //   })
 // );
-app.options("*", cors());
-
-app.use((req, res, next) => {
-  console.log(`${req.method} request for ${req.url}`);
-  next();
-});
+app.options(cors());
 
 const connectDb = async () => {
   try {
