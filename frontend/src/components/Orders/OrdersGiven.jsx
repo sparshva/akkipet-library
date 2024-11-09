@@ -201,7 +201,7 @@ const OrdersGiven = ({
   return (
     <>
       {" "}
-      <div className="w-full ">
+      <div className="w-full h-full">
         <div className="  flex flex-col mb-4  w-full">
           <div class="flex gap-4 w-full mb-2 overflow-hidden  mx-auto font-[sans-serif]">
             <div className="flex px-4 py-2 bg-white rounded-md border-2 w-full overflow-hidden  mx-auto font-[sans-serif]">

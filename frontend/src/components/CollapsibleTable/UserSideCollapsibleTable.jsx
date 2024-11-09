@@ -53,13 +53,19 @@ function Row({ row, selectedBooks, setSelectedBooks, windowWidth }) {
           sx={{
             padding: "0 20px",
             fontSize: "16px",
-            color: row.status != "AVAILABLE" ? "#949494" : "inherit",
+            color: row.status !== "AVAILABLE" ? "#949494" : "inherit",
+            display: "flex",
+            flexDirection: "column",
+            flexWrap: "wrap",
+            width: "100%", // Ensure the TableCell takes up full width
           }}
         >
-          {row.name}
-          {/* <br></br>
-          <br></br>
-          {row.author} */}
+          <div style={{ width: "100%" }}>
+            <strong>Book Name in Hindi:</strong> {row.nameInHindi}
+          </div>
+          <div style={{ width: "100%", marginTop: "8px" }}>
+            <strong>Book Name in English:</strong> {row.nameInEnglish}
+          </div>
         </TableCell>
         {windowWidth > 500 && (
           <TableCell
@@ -159,7 +165,7 @@ function Row({ row, selectedBooks, setSelectedBooks, windowWidth }) {
                 gutterBottom
                 component="div"
               >
-                Book Details
+                <strong>Book Details</strong>
               </Typography>
               <Table size="small" aria-label="book-details">
                 {/* <TableHead>
@@ -344,7 +350,7 @@ const UserSideCollapsibleTable = ({
                 fontSize: "18px",
               }}
             >
-              Name / नाम
+              <strong>Name / नाम</strong>
             </TableCell>
             {windowWidth > 500 && (
               <TableCell
@@ -354,7 +360,7 @@ const UserSideCollapsibleTable = ({
                   fontSize: "18px",
                 }}
               >
-                Author / लेखक
+                <strong>Author / लेखक</strong>
               </TableCell>
             )}
             {windowWidth > 800 && (
@@ -365,7 +371,7 @@ const UserSideCollapsibleTable = ({
                   fontSize: "18px",
                 }}
               >
-                Editor / संपादक
+                <strong> Editor / संपादक</strong>
               </TableCell>
             )}
             {windowWidth > 950 && (
@@ -376,7 +382,7 @@ const UserSideCollapsibleTable = ({
                   fontSize: "18px",
                 }}
               >
-                Publisher / प्रकाशक
+                <strong>Publisher / प्रकाशक</strong>
               </TableCell>
             )}
             {windowWidth > 1050 && (
@@ -387,7 +393,7 @@ const UserSideCollapsibleTable = ({
                   fontSize: "18px",
                 }}
               >
-                Topic / विषय
+                <strong>Topic / विषय</strong>
               </TableCell>
             )}
             {windowWidth > 1250 && (
@@ -398,7 +404,7 @@ const UserSideCollapsibleTable = ({
                   fontSize: "18px",
                 }}
               >
-                Language / भाषा
+                <strong>Language / भाषा</strong>
               </TableCell>
             )}
             <TableCell></TableCell>

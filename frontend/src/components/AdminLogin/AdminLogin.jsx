@@ -64,8 +64,8 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="flex w-full h-full  justify-center items-center">
-      <section className=" py-4 px-1  w-full">
+    <div className="flex w-full h-full justify-center items-center">
+      <section className=" py-10 px-2  w-full">
         <div className="w-full  px-2   flex justify-center items-center ">
           <div className="relative border-0 shadow-[0_2px_5px_1px_rgba(0,0,0,0.3)]  flex flex-col min-w-0 break-words w-full  rounded-lg  max-w-[50vh] ">
             <div className="rounded-t bg-white mb-0 px-4 py-6">

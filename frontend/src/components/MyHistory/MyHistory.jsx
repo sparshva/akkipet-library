@@ -86,7 +86,10 @@ const MyHistory = () => {
             Welcome Back
           </h2> */}
           <p className="text-gray-600">
-            {showOTP ? "Enter OTP to verify" : "Enter your phone number..."}
+            <strong>
+              {" "}
+              {showOTP ? "Enter OTP to verify" : "Enter your phone number..."}
+            </strong>
           </p>
         </div>
 
@@ -125,12 +128,12 @@ const MyHistory = () => {
             </button>
           </form>
         ) : (
-          <form onSubmit={handleVerifyOTP} className="space-y-6">
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+          <form onSubmit={handleVerifyOTP} className="space-y-6 ">
+            <div className="relative flex items-center justify-center ">
+              <div className=" flex  items-center pointer-events-none">
                 <LockOutlinedIcon className="h-5 w-5 text-gray-400" />
               </div>
-              <div className="flex justify-between space-x-2 pl-12">
+              <div className="flex  justify-between space-x-2 pl-2">
                 {otp.map((digit, index) => (
                   <input
                     key={index}
@@ -140,7 +143,7 @@ const MyHistory = () => {
                     value={digit}
                     onChange={(e) => handleOTPChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
-                    className="w-12 h-12 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    className="w-8 h-8 text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     aria-label={`OTP digit ${index + 1}`}
                   />
                 ))}
@@ -156,7 +159,7 @@ const MyHistory = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center disabled:opacity-50"
+              className="w-full bg-[#ad0000] text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center disabled:opacity-50"
             >
               {isLoading ? (
                 <AutorenewIcon className="animate-spin h-5 w-5" />

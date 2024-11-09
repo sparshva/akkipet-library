@@ -28,7 +28,7 @@ function FacebookCircularProgress(props) {
             color: theme.palette.grey[800],
           }),
         })}
-        size={50}
+        size={35}
         thickness={3}
         {...props}
         value={100}
@@ -37,7 +37,7 @@ function FacebookCircularProgress(props) {
         variant="indeterminate"
         disableShrink
         sx={(theme) => ({
-          color: "#1a90ff",
+          color: "#ad0000",
           animationDuration: "550ms",
           position: "absolute",
           left: 0,
@@ -48,7 +48,7 @@ function FacebookCircularProgress(props) {
             color: "#308fe8",
           }),
         })}
-        size={50}
+        size={35}
         thickness={3}
         {...props}
       />
@@ -445,7 +445,7 @@ const Books = () => {
           <div className="w-full  mt-15 mb-4 rounded-md px-2  overflow-y-auto ">
             {loading ? (
               <>
-                <div className="w-full h-full  flex justify-center items-center">
+                <div className="w-full h-full p-4  flex justify-center items-center">
                   <FacebookCircularProgress />
                 </div>
               </>
@@ -464,7 +464,7 @@ const Books = () => {
               </>
             )}
           </div>
-          <div className=" mb-[8vh] flex justify-end  items-center ">
+          <div className=" flex justify-end  items-center ">
             {/* <Stack>
               <Pagination
                 count={Math.ceil(totalBooks / 20)}

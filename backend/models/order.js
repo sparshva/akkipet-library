@@ -66,6 +66,16 @@ const orderSchema = new mongoose.Schema(
       required: [true, "Book Name is required"],
       trim: true,
     },
+    acceptedOrRejectedBy: {
+      type: String,
+      // required: [true, "Book Name is required"],
+      trim: true,
+    },
+    returnAcceptedBy: {
+      type: String,
+      // required: [true, "Book Name is required"],
+      trim: true,
+    },
     returnDate: { type: Date }, // Date when the book was returned
     createdAt: { type: Date, default: Date.now },
     acceptedOrRejectedAt: { type: Date },

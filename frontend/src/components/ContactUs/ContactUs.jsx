@@ -27,7 +27,7 @@ const ContactUs = () => {
   }, []);
   return (
     <>
-      <div className="h-screen mb-[2rem] px-4">
+      <div className="h-full  px-4">
         <div className="py-4">
           <h1 className="text-[16px] text-red-600  mb-8  font-bold text-center">
             For any questions or updates about your order, or if you need

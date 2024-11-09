@@ -3,15 +3,25 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 
-import img10 from "../../images/img10.jpg";
-import img2 from "../../images/img2.jpg";
-import img3 from "../../images/img3.jpg";
-import img4 from "../../images/img4.jpg";
-import img5 from "../../images/img5.jpg";
-import img6 from "../../images/img6.jpg";
-import img7 from "../../images/img7.jpg";
-import img8 from "../../images/img8.jpg";
-import img9 from "../../images/img9.jpg";
+// import img10 from "../../images/img10.jpg";
+// import img2 from "../../images/img2.jpg";
+// import img3 from "../../images/img3.jpg";
+// import img4 from "../../images/img4.jpg";
+// import img5 from "../../images/img5.jpg";
+// import img6 from "../../images/img6.jpg";
+// import img7 from "../../images/img7.jpg";
+// import img8 from "../../images/img8.jpg";
+// import img9 from "../../images/img9.jpg";
+
+const img10 = process.env.PUBLIC_URL + "/images/img10.jpg";
+const img2 = process.env.PUBLIC_URL + "/images/img2.jpg";
+const img3 = process.env.PUBLIC_URL + "/images/img3.jpg";
+const img4 = process.env.PUBLIC_URL + "/images/img4.jpg";
+const img5 = process.env.PUBLIC_URL + "/images/img5.jpg";
+const img6 = process.env.PUBLIC_URL + "/images/img6.jpg";
+const img7 = process.env.PUBLIC_URL + "/images/img7.jpg";
+const img8 = process.env.PUBLIC_URL + "/images/img8.jpg";
+const img9 = process.env.PUBLIC_URL + "/images/img9.jpg";
 
 const Carousel = () => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);

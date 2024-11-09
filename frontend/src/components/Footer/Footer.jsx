@@ -7,7 +7,7 @@ import HomeIcon from "@mui/icons-material/Home";
 const Footer = () => {
   const navigate = useNavigate();
   return (
-    <footer className="bg-[#ad0000] sticky bottom-0 left-0 right-0 flex py-1 items-center  text-white  ">
+    <footer className="bg-[#ad0000] fixed bottom-0 left-0 right-0 flex py-1 items-center  text-white  ">
       <a
         href="https://www.google.com/maps/dir//Obaiah+Ln,+Akkipete,+Chickpet,+Bengaluru,+Karnataka+560053/@12.9706505,77.4894714,12z/data=!4m8!4m7!1m0!1m5!1m1!1s0x3bae16066432b615:0xf969c14fc278faef!2m2!1d77.5718066!2d12.97067?entry=ttu&g_ep=EgoyMDI0MTAyOS4wIKXMDSoASAFQAw%3D%3D"
         target="_blank"

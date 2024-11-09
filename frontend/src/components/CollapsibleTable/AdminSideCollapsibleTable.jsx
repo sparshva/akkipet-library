@@ -56,13 +56,19 @@ function Row({ row, selectedBooks, setSelectedBooks, windowWidth }) {
           sx={{
             padding: "0 20px",
             fontSize: "16px",
-            color: row.status != "AVAILABLE" ? "#949494" : "inherit",
+            color: row.status !== "AVAILABLE" ? "#949494" : "inherit",
+            display: "flex",
+            flexDirection: "column",
+            flexWrap: "wrap",
+            width: "100%", // Ensure the TableCell takes up full width
           }}
         >
-          {row.name}
-          {/* <br></br>
-          <br></br>
-          {row.author} */}
+          <div style={{ width: "100%" }}>
+            <strong>Book Name in Hindi:</strong> {row.nameInHindi}
+          </div>
+          <div style={{ width: "100%", marginTop: "8px" }}>
+            <strong>Book Name in English:</strong> {row.nameInEnglish}
+          </div>
         </TableCell>
         {windowWidth > 500 && (
           <TableCell
@@ -177,7 +183,7 @@ function Row({ row, selectedBooks, setSelectedBooks, windowWidth }) {
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
               <Typography variant="h6" gutterBottom component="div">
-                Book Details
+                <strong>Book Details</strong>
               </Typography>
               <Table size="small" aria-label="book-details">
                 {/* <TableHead>
@@ -407,20 +413,20 @@ const AdminSideCollapsibleTable = ({
               align="left"
               sx={{
                 padding: "20px 20px",
-                fontSize: "20px",
+                fontSize: "18px",
               }}
             >
-              Name
+              <strong>Name / नाम</strong>
             </TableCell>
             {windowWidth > 500 && (
               <TableCell
                 align="left"
                 sx={{
                   padding: "10px 20px",
-                  fontSize: "20px",
+                  fontSize: "18px",
                 }}
               >
-                Author
+                <strong>Author / लेखक</strong>
               </TableCell>
             )}
             {windowWidth > 800 && (
@@ -428,10 +434,10 @@ const AdminSideCollapsibleTable = ({
                 align="left"
                 sx={{
                   padding: "10px 20px",
-                  fontSize: "20px",
+                  fontSize: "18px",
                 }}
               >
-                Language
+                <strong> Editor / संपादक</strong>
               </TableCell>
             )}
             {windowWidth > 950 && (
@@ -439,10 +445,10 @@ const AdminSideCollapsibleTable = ({
                 align="left"
                 sx={{
                   padding: "10px 20px",
-                  fontSize: "20px",
+                  fontSize: "18px",
                 }}
               >
-                Topic
+                <strong>Publisher / प्रकाशक</strong>
               </TableCell>
             )}
             {windowWidth > 1050 && (
@@ -450,10 +456,21 @@ const AdminSideCollapsibleTable = ({
                 align="left"
                 sx={{
                   padding: "10px 20px",
-                  fontSize: "20px",
+                  fontSize: "18px",
                 }}
               >
-                Editor
+                <strong>Topic / विषय</strong>
+              </TableCell>
+            )}
+            {windowWidth > 1250 && (
+              <TableCell
+                align="left"
+                sx={{
+                  padding: "10px 20px",
+                  fontSize: "18px",
+                }}
+              >
+                <strong>Language / भाषा</strong>
               </TableCell>
             )}
             <TableCell

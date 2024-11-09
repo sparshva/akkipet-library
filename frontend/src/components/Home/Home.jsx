@@ -6,6 +6,7 @@ import { toast } from "../Toast/Toast";
 import axios from "axios";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
 import LibraryBooksRoundedIcon from "@mui/icons-material/LibraryBooksRounded";
+// https://akkipet-library-1.onrender.com
 
 const Home = () => {
   const navigate = useNavigate();
@@ -123,98 +124,60 @@ const Home = () => {
         <div class="grid gap-6 mb-8 sm:grid-cols-2 ">
           {/* <!-- Card --> */}
           <div
-            class="flex items-center p-4 bg-white rounded-lg  dark:bg-gray-800"
+            class="flex items-center p-4 bg-white rounded-lg  "
             style={{
               boxShadow:
                 " rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px",
             }}
           >
-            <div class="p-3 mr-4 text-orange-500 bg-orange-100 rounded-full dark:text-orange-100 dark:bg-orange-500">
+            <div class="p-3 mr-4 text-orange-500 bg-orange-100 rounded-full">
               <LocalShippingOutlinedIcon />
             </div>
             <div>
-              <p class="mb-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-                Total Orders
+              <p class="mb-2 text-sm font-medium text-gray-600">
+                <strong>Total Orders</strong>
               </p>
-              <p class="text-lg font-semibold text-gray-700 dark:text-gray-200">
-                {totalOrders}
-              </p>
+              <p class="text-lg font-semibold text-gray-700 ">{totalOrders}</p>
             </div>
           </div>
           {/* <!-- Card --> */}
           <div
-            class="flex items-center p-4 bg-white rounded-lg  dark:bg-gray-800"
+            class="flex items-center p-4 bg-white rounded-lg  "
             style={{
               boxShadow:
                 " rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px",
             }}
           >
-            <div class="p-3 mr-4 text-green-500 bg-green-100 rounded-full dark:text-green-100 dark:bg-green-500">
+            <div class="p-3 mr-4 text-green-500 bg-green-100 rounded-full ">
               <LibraryBooksRoundedIcon />
             </div>
             <div>
-              <p class="mb-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-                Total Books
+              <p class="mb-2 text-sm font-medium text-gray-600 ">
+                <strong>Total Books</strong>
               </p>
-              <p class="text-lg font-semibold text-gray-700 dark:text-gray-200">
-                {totalBooks}
-              </p>
+              <p class="text-lg font-semibold text-gray-700 ">{totalBooks}</p>
             </div>
           </div>
-          {/* <!-- Card --> */}
-          {/* <div class="flex items-center p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800">
-              <div class="p-3 mr-4 text-teal-500 bg-teal-100 rounded-full dark:text-teal-100 dark:bg-teal-500">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path
-                    fill-rule="evenodd"
-                    d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zM7 8H5v2h2V8zm2 0h2v2H9V8zm6 0h-2v2h2V8z"
-                    clip-rule="evenodd"
-                  ></path>
-                </svg>
-              </div>
-              <div>
-                <p class="mb-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-                  My Tutorials
-                </p>
-                <p class="text-lg font-semibold text-gray-700 dark:text-gray-200">
-                  376
-                </p>
-              </div>
-            </div> */}
-          {/* <!-- Card --> */}
-          {/* <div class="flex items-center p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800">
-              <div class="p-3 mr-4 text-blue-500 bg-blue-100 rounded-full dark:text-blue-100 dark:bg-blue-500">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path>
-                </svg>
-              </div>
-              <div>
-                <p class="mb-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-                  My Purchases
-                </p>
-                <p class="text-lg font-semibold text-gray-700 dark:text-gray-200">
-                  35
-                </p>
-              </div>
-            </div> */}
         </div>
         {/* </div> */}
       </div>
       <div className="w-full  px-5">
         <div
-          className="w-full p-3    rounded-[2px] bg-white  text-left mb-4 "
+          className="w-full p-3   text-[#ff1414]  rounded-[2px] bg-white  text-left  "
           style={{
             boxShadow:
               " rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px",
           }}
         >
-          <div className="font-semibold text-[#ff1414] text-[19px]">Rules</div>
-          <div className="font-semibold  text-[16px]">
+          <div className="font-semibold text-[#ff1414] text-[20px] mb-6">
+            <strong>सूचना पत्र</strong>
+          </div>
+          <div className="font-semibold  text-[16px] mb-3">
             श्रुतपिपासु श्रमण श्रमणी भगवंत को वंदन | श्रावक श्राविका को प्रणाम |
             हमारे ज्ञान भंडार को लाभ देने के लिए धन्यवाद | ज्ञान भंडार की
             व्यवस्था के लिए नीचे लिखे सूचनाओं को पढ़कर खास ध्यान रखे ऐसी विनंती
           </div>
-          <br />
+          {/* <br /> */}
           <div className="font-semibold text-[#ff1414] text-[15px]">
             <div>
               <strong>०१ -</strong> जो भी पुस्तक एक दिवस या घंटे के लिए भी ले

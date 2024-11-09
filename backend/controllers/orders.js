@@ -66,10 +66,10 @@ export const createOrders = async (req, res) => {
     // Create a new order for each available book
     const createdOrders = [];
     for (const book of books) {
-      const { serialNumber, name } = book;
+      const { serialNumber, nameInHindi } = book;
 
       // Ensure each book has the necessary details
-      if (!serialNumber || !name) {
+      if (!serialNumber || !nameInHindi) {
         return res.status(400).json({
           message: "Each book must have a serial number and a name.",
         });
@@ -83,6 +83,20 @@ export const createOrders = async (req, res) => {
       );
 
       // Create a new order for the book
+      console.log({
+        sahebjiName,
+        samuday,
+        contactName,
+        contactNumber,
+        address,
+        city,
+        pinCode,
+        days,
+        orderStatus: "PENDING",
+        bookSerialNumber: serialNumber,
+        bookName: nameInHindi,
+        extraInfo,
+      });
       const newOrder = new Order({
         sahebjiName,
         samuday,
@@ -94,7 +108,7 @@ export const createOrders = async (req, res) => {
         days,
         orderStatus: "PENDING",
         bookSerialNumber: serialNumber,
-        bookName: name,
+        bookName: nameInHindi,
         extraInfo,
       });
 
@@ -143,6 +157,7 @@ export const updateOrderStatus = async (req, res) => {
     );
   }
 
+  order.acceptedOrRejectedBy = req.user.name;
   order.updatedAt = new Date();
   order.acceptedOrRejectedAt = new Date();
   console.log("order updated");
@@ -163,6 +178,7 @@ export const processReturn = async (req, res) => {
   }
 
   // Update the order status to RETURNED and set the return date
+  order.returnAcceptedBy = req.user.name;
   order.orderStatus = "RETURNED";
   order.returnDate = new Date();
 

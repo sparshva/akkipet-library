@@ -23,7 +23,7 @@ export const deleteSelectedBooks = async (req, res) => {
   if (!Array.isArray(books) || books.length === 0) {
     return res
       .status(400)
-      .json({ message: "Provide a non-empty array of books to update." });
+      .json({ message: "Provide a non-empty array of books to delete." });
   }
 
   console.log(books);
@@ -38,26 +38,50 @@ export const deleteSelectedBooks = async (req, res) => {
   }
 
   try {
-    // Update status of books with IDs in the extracted array
-    const result = await Book.updateMany(
-      { _id: { $in: bookIds } },
-      { $set: { status: "DELETED" } }
-    );
+    // Check if any of the selected books have a status of "NOT AVAILABLE"
+    const unavailableBooks = await Book.find({
+      _id: { $in: bookIds },
+      status: "NOT AVAILABLE",
+    });
 
-    // Check if any books were updated
-    if (result.modifiedCount === 0) {
+    if (unavailableBooks.length > 0) {
+      // Find the serial numbers (indices) of the unavailable books
+      const unavailableSerialNumbers = unavailableBooks.map(
+        (unavailableBook) => {
+          // Find the serial number (index) of the book from the original books array
+          return (
+            books.findIndex(
+              (book) => book._id.toString() === unavailableBook._id.toString()
+            ) + 1
+          );
+        }
+      );
+
+      return res.status(400).json({
+        message: `Books at serial numbers ${unavailableSerialNumbers.join(
+          ", "
+        )} cannot be deleted because they are currently ordered (status: NOT AVAILABLE).`,
+        unavailableBooks: unavailableSerialNumbers,
+      });
+    }
+
+    // Delete books if all are available
+    const result = await Book.deleteMany({ _id: { $in: bookIds } });
+
+    // Check if any books were deleted
+    if (result.deletedCount === 0) {
       return res
         .status(404)
         .json({ message: "No books found with the provided IDs." });
     }
 
     res.status(200).json({
-      message: `${result.modifiedCount} books marked as DELETED successfully.`,
-      modifiedCount: result.modifiedCount,
+      message: `${result.deletedCount} books deleted successfully.`,
+      deletedCount: result.deletedCount,
     });
   } catch (error) {
-    console.error("Error updating book statuses:", error);
-    res.status(500).json({ message: "Error updating book statuses" });
+    console.error("Error deleting books:", error);
+    res.status(500).json({ message: "Error deleting books" });
   }
 };
 
@@ -89,7 +113,8 @@ export const getBooksByFilterRequest = async (req, res) => {
       const escapedSearchTerm = escapeRegExp(filters.searchTerm); // Escape special characters
       query.$and.push({
         $or: [
-          { name: { $regex: escapedSearchTerm, $options: "i" } }, // Case-insensitive search for name
+          { nameInHindi: { $regex: escapedSearchTerm, $options: "i" } }, // Case-insensitive search for name
+          { nameInEnglish: { $regex: escapedSearchTerm, $options: "i" } },
           { serialNumber: { $regex: escapedSearchTerm, $options: "i" } }, // Case-insensitive search for serialNumber
         ],
       });
@@ -123,7 +148,7 @@ export const getBooksByFilterRequest = async (req, res) => {
     const finalQuery = hasFilters ? query : {};
 
     const results = await Book.find(finalQuery)
-      .sort("name") // Sorting by serialNumber
+      .sort("nameInHindi") // Sorting by serialNumber
       .skip((page - 1) * limit) // Pagination logic
       .limit(limit); // Limit the number of results per page
 
@@ -191,7 +216,8 @@ export const exportBooks = async (req, res) => {
     // Define columns for the worksheet
     worksheet.columns = [
       { header: "Serial Number", key: "serialNumber", width: 15 },
-      { header: "Name", key: "name", width: 25 },
+      { header: "Name In Hindi", key: "nameInHindi", width: 25 },
+      { header: "Name In English", key: "nameInEnglish", width: 25 },
       { header: "Author", key: "author", width: 25 },
       { header: "Editor", key: "editor", width: 20 },
       { header: "Publisher", key: "publisher", width: 20 },
@@ -204,7 +230,8 @@ export const exportBooks = async (req, res) => {
     books.forEach((book) => {
       worksheet.addRow({
         serialNumber: book.serialNumber,
-        name: book.name,
+        nameInHindi: book.nameInHindi,
+        nameInEnglish: book.nameInEnglish,
         author: book.author,
         editor: book.editor,
         publisher: book.publisher,
@@ -236,7 +263,7 @@ export const uploadBooks = async (req, res) => {
     }
 
     const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.readFile(req.file.path); // Read the uploaded file
+    await workbook.xlsx.load(req.file.buffer); // Read the uploaded file
 
     const worksheet = workbook.getWorksheet(1); // Assume data is in the first sheet
     const books = [];
@@ -247,19 +274,21 @@ export const uploadBooks = async (req, res) => {
       // Extract book data from the row
       const book = {
         serialNumber: row.getCell(1).value,
-        name: row.getCell(2).value,
-        author: row.getCell(3).value,
-        editor: row.getCell(4).value,
-        publisher: row.getCell(5).value,
-        topic: row.getCell(6).value,
-        language: row.getCell(7).value,
-        status: row.getCell(8).value,
+        nameInHindi: row.getCell(2).value,
+        nameInEnglish: row.getCell(3).value,
+        author: row.getCell(4).value,
+        editor: row.getCell(5).value,
+        publisher: row.getCell(6).value,
+        topic: row.getCell(7).value,
+
+        language: row.getCell(8).value,
+        status: row.getCell(9).value,
       };
 
-      // Check required fields and only create a validBook object if all required fields are present
       const requiredFields = [
         "serialNumber",
-        "name",
+        "nameInHindi",
+        "nameInEnglish",
         "author",
         "editor",
         "publisher",
@@ -303,7 +332,7 @@ export const uploadBooks = async (req, res) => {
       await Book.bulkWrite(bulkOps);
     }
 
-    fs.unlinkSync(req.file.path); // Delete file after processing
+    // fs.unlinkSync(req.file.path); // Delete file after processing
 
     res.status(200).json({ message: "Books imported successfully" });
   } catch (error) {

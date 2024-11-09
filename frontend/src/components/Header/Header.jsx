@@ -10,8 +10,8 @@ import AccountBoxIcon from "@mui/icons-material/AccountBox";
 import LibraryBooksRoundedIcon from "@mui/icons-material/LibraryBooksRounded";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import HistoryToggleOffIcon from "@mui/icons-material/HistoryToggleOff";
-import img1 from "../../images/img1.jpg";
-import logo from "../../images/logo.png";
+// import img1 from "../../images/img1.jpg";
+const logo = process.env.PUBLIC_URL + "/images/logo.png";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);

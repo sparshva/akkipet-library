@@ -167,7 +167,7 @@ const Cart = () => {
   // };
 
   return (
-    <div className="w-full   flex px-8 flex-col">
+    <div className="w-full h-full  flex px-8 flex-col">
       <div className="w-full  py-4 ">
         <div className="w-full mb-4 text-[18px]">My Cart</div>
         <div className="w-full flex flex-col justify-center items-center">
@@ -203,7 +203,7 @@ const Cart = () => {
                     <div className="w-full flex flex-col  px-2 ">
                       <div className="flex p-1 items-center flex-wrap">
                         <p>Name: &nbsp; </p>
-                        <p className="text-base">{book.name}</p>
+                        <p className="text-base">{book.nameInHindi}</p>
                       </div>
                     </div>
                     <div>
@@ -223,6 +223,14 @@ const Cart = () => {
                   </div>
                 </AccordionSummary>
                 <AccordionDetails>
+                  <div className="flex p-1 items-center flex-wrap">
+                    <p>Name In Hindi: &nbsp; </p>
+                    <p className="text-base">{book.nameInHindi}</p>{" "}
+                  </div>
+                  <div className="flex p-1 items-center flex-wrap">
+                    <p>Name In English: &nbsp; </p>
+                    <p className="text-base">{book.nameInEnglish}</p>{" "}
+                  </div>
                   <div className="flex p-1 items-center flex-wrap">
                     <p>Author: &nbsp; </p>
                     <p className="text-base">{book.author}</p>{" "}
@@ -254,7 +262,7 @@ const Cart = () => {
         </div>
       </div>
 
-      <section className=" mb-[1rem]   w-full bg-white">
+      <section className="   w-full bg-white">
         <div className="w-full   mx-auto   ">
           <div className="relative border-0 shadow-[0_2px_5px_1px_rgba(0,0,0,0.3)]  flex flex-col min-w-0 break-words w-full  rounded-lg bg-blueGray-100 ">
             <div className="rounded-t bg-white mb-0 px-4 py-4">
@@ -397,10 +405,18 @@ const Cart = () => {
                   <div className="w-full lg:w-12/12 px-4">
                     <div className="relative w-full mb-3">
                       <label
-                        className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
+                        className="  flex flex-col flex-wrap text-blueGray-600 text-xs font-bold mb-2"
                         htmlFor="grid-password"
                       >
-                        Address
+                        <div className="uppercase ">
+                          Address
+                          <span className="text-red-600 text-[12px] lowercase ml-2">
+                            ( If courier required )
+                          </span>
+                        </div>
+                        <span className="text-red-600 text-[12px] lowercase">
+                          courier charges will be borne by the recipient.
+                        </span>
                       </label>
                       <textarea
                         type="text"

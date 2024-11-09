@@ -28,7 +28,7 @@ function FacebookCircularProgress(props) {
             color: theme.palette.grey[800],
           }),
         })}
-        size={50}
+        size={35}
         thickness={3}
         {...props}
         value={100}
@@ -48,7 +48,7 @@ function FacebookCircularProgress(props) {
             color: "#308fe8",
           }),
         })}
-        size={50}
+        size={35}
         thickness={3}
         {...props}
       />
@@ -265,7 +265,7 @@ const SearchBooks = () => {
   return (
     <>
       <div
-        className={`w-full relative  min-h-full py-4 flex flex-col ${
+        className={`w-full relative mb-[3rem] min-h-full py-4 flex flex-col ${
           windowWidth < 450 ? "px-4" : "px-8" // Example condition based on window size
         }`}
       >
@@ -325,7 +325,7 @@ const SearchBooks = () => {
           <div className="w-full  mt-15 mb-4 rounded-md px-2  overflow-y-auto ">
             {loading ? (
               <>
-                <div className="w-full h-full  flex justify-center items-center">
+                <div className="w-full h-full  p-4  flex justify-center items-center">
                   <FacebookCircularProgress />
                 </div>
               </>
@@ -415,7 +415,7 @@ const SearchBooks = () => {
         </div>
 
         <div
-          className={`sticky flex justify-end bottom-[3.2rem] left-0 right-0 z-10 w-full ${
+          className={`fixed flex justify-end bottom-[2.9rem] left-0 right-0 z-10 w-full ${
             windowWidth < 450 ? "p-[0.75rem]" : "py-[0.75rem] px-[1.75rem]" // Example condition based on window size
           }  bg-gray-200`}
         >

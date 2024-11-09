@@ -8,21 +8,17 @@ const bookSchema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
-    name: {
+
+    nameInHindi: {
       type: String,
       required: true,
       trim: true,
     },
-    // nameInHindi: {
-    //   type: String,
-    //   required: true,
-    //   trim: true,
-    // },
-    // nameInEnglish: {
-    //   type: String,
-    //   required: true,
-    //   trim: true,
-    // },
+    nameInEnglish: {
+      type: String,
+      required: true,
+      trim: true,
+    },
     author: {
       type: String,
       // required: true,
@@ -50,7 +46,7 @@ const bookSchema = new mongoose.Schema(
     status: {
       type: String, // Set the type to Boolean
       default: "AVAILABLE", // Default to 'AVAILABLE'
-      enum: ["AVAILABLE", "NOT AVAILABLE", "DELETED"], // Available,
+      enum: ["AVAILABLE", "NOT AVAILABLE"], // Available,
     },
   },
   {

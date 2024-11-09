@@ -29,7 +29,7 @@ function App() {
     <AppProvider>
       {" "}
       {/* Wrap your app with the AppProvider */}
-      <div className="App bg-[#fafafa] ">
+      <div className="App bg-[#fafafa] min-h-[100vh] pb-[4rem]  relative">
         <Toast />
         <Header />
         {/* <Router> */}

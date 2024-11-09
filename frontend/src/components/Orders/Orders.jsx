@@ -233,7 +233,7 @@ const Orders = () => {
   };
 
   return (
-    <div className="container mb-10 p-4 mx-auto w-full">
+    <div className="container h-full p-4 mx-auto w-full">
       <div className="mb-8">
         <div className="flex flex-col gap-2 sm:flex-row sm:gap-0 sm:border-b border-gray-200">
           {tabs.map((tab) => (
