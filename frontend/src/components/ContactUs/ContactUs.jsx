@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import UserContactCard from "./UserContactCard";
+import { toast } from "../Toast/Toast";
 
 const ContactUs = () => {
   const [allUsers, setAllUsers] = useState([]);
@@ -17,9 +18,10 @@ const ContactUs = () => {
 
       setAllUsers(response.data);
       //   setBooks(response.data);
-      console.log("Fetched users:", response.data);
+      // console.log("Fetched users:", response.data);
     } catch (error) {
       console.error("Error fetching users:", error);
+      toast.error("Failed to fetch users");
     }
   };
   useEffect(() => {
@@ -36,14 +38,16 @@ const ContactUs = () => {
           </h1>
 
           <div className="grid grid-cols-1 gap-y-4 justify-items-center">
-            {allUsers.map(
-              (user) =>
-                !user.isSuperAdmin && (
-                  <div className="w-full max-w-md">
-                    <UserContactCard key={user._id} user={user} />
-                  </div>
-                )
-            )}
+            {allUsers &&
+              allUsers.length > 0 &&
+              allUsers.map(
+                (user) =>
+                  !user.isSuperAdmin && (
+                    <div className="w-full max-w-md">
+                      <UserContactCard key={user._id} user={user} />
+                    </div>
+                  )
+              )}
           </div>
         </div>
       </div>

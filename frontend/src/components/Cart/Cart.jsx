@@ -34,7 +34,7 @@ const Cart = () => {
     if (!confirmAction) return;
 
     // Log the order info for debugging
-    console.log({ ...orderinfo, books: cartBooks });
+    // console.log({ ...orderinfo, books: cartBooks });
 
     try {
       // Call the API to submit the order
@@ -50,12 +50,6 @@ const Cart = () => {
           pending: "Submitting your order...",
           success: {
             render({ data }) {
-              // Log the response data for debugging
-              console.log("Books ordered:", data);
-              // Show a success message
-              // if (response.status === 201) {
-              //   console.log("Books ordered:", response.data);
-
               // Start the countdown
               setCountdown(5); // Set initial countdown value to 5 seconds
               // }
@@ -98,7 +92,7 @@ const Cart = () => {
     }
   };
   const [countdown, setCountdown] = useState(null);
-  console.log(countdown);
+  // console.log(countdown);
 
   // Effect to handle countdown and redirection
   useEffect(() => {
@@ -106,7 +100,7 @@ const Cart = () => {
 
     const interval = setInterval(() => {
       setCountdown((prevCountdown) => {
-        console.log("countdown", prevCountdown);
+        // console.log("countdown", prevCountdown);
         if (prevCountdown <= 1) {
           clearInterval(interval);
           navigate("/contact-us");
@@ -118,53 +112,6 @@ const Cart = () => {
 
     return () => clearInterval(interval); // Clean up on component unmount
   }, [countdown]);
-  // const handleSubmitOrder = async (e) => {
-  //   e.preventDefault();
-  //   const confirmAction = window.confirm(
-  //     "Are you sure you want to order these books?"
-  //   );
-  //   if (!confirmAction) return;
-
-  //   console.log({ ...orderinfo, books: cartBooks });
-
-  //   try {
-  //     const response = await axios.post(
-  //       `${process.env.REACT_APP_BACKEND_BASE_URL}/order/create-order`,
-  //       { ...orderinfo, books: cartBooks },
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${localStorage.getItem("token")}`,
-  //         },
-  //       }
-  //     );
-  //     console.log(response.status);
-
-  //     if (response.status === 201) {
-  //       console.log("Books ordered:", response.data);
-
-  //       // Start the countdown
-  //       setCountdown(5); // Set initial countdown value to 5 seconds
-  //     }
-
-  //     // Clear the cart and reset the order info
-  //     clearAll();
-  //     setOrderInfo({
-  //       sahebjiName: "",
-  //       samuday: "",
-  //       contactName: "",
-  //       contactNumber: "",
-  //       address: "",
-  //       city: "",
-  //       pinCode: "",
-  //       days: null,
-  //       extraInfo: "",
-  //       books: [],
-  //     });
-  //   } catch (error) {
-  //     console.error("An error occurred while submitting the order:", error);
-  //     toast.error("Error creating order");
-  //   }
-  // };
 
   return (
     <div className="w-full h-full  flex px-8 flex-col">
@@ -192,11 +139,6 @@ const Cart = () => {
                     pointerEvents: "none",
                     display: "flex",
                     flexDirection: "row-reverse",
-                    //   border: "1px solid black",
-                    //   padding: "0px 10px",
-                    //   "& MuiAccordion-heading": {
-                    //     padding: 0,
-                    //   },
                   }}
                 >
                   <div className="w-full flex justify-end  items-center px-1">
@@ -270,12 +212,6 @@ const Cart = () => {
                 <h6 className="text-blueGray-700 text-xl font-bold">
                   Contact info
                 </h6>
-                {/* <button
-                  className="bg-pink-500 text-white active:bg-pink-600 font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1 ease-linear transition-all duration-150"
-                  type="button"
-                >
-                  Settings
-                </button> */}
               </div>
             </div>
             <div className="flex-auto px-4 lg:px-10 py-4   pt-0">
@@ -296,12 +232,16 @@ const Cart = () => {
                         type="text"
                         className="border-2 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                         value={orderinfo.sahebjiName}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          // Allow only letters and spaces, remove everything else (e.g., numbers, punctuation)
+                          const filteredValue = value.replace(/[0-9]/g, "");
+
                           setOrderInfo({
                             ...orderinfo,
-                            sahebjiName: e.target.value,
-                          })
-                        }
+                            sahebjiName: filteredValue,
+                          });
+                        }}
                       />
                     </div>
                   </div>
@@ -317,12 +257,16 @@ const Cart = () => {
                         type="text"
                         className="border-2 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                         value={orderinfo.samuday}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          // Allow only letters and spaces, remove everything else (e.g., numbers, punctuation)
+                          const filteredValue = value.replace(/[0-9]/g, "");
+
                           setOrderInfo({
                             ...orderinfo,
-                            samuday: e.target.value,
-                          })
-                        }
+                            samuday: filteredValue,
+                          });
+                        }}
                       />
                     </div>
                   </div>
@@ -346,12 +290,19 @@ const Cart = () => {
                         type="text"
                         className="border-2 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                         value={orderinfo.contactName}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          // Allow only letters and spaces, remove everything else (e.g., numbers, punctuation)
+                          const filteredValue = value.replace(
+                            /[^A-Za-z\s\u0900-\u097F]/g,
+                            ""
+                          );
+                          console.log(filteredValue);
                           setOrderInfo({
                             ...orderinfo,
-                            contactName: e.target.value,
-                          })
-                        }
+                            contactName: filteredValue,
+                          });
+                        }}
                         required={true}
                       />
                     </div>
@@ -504,9 +455,6 @@ const Cart = () => {
 
                 <hr className="mt-6 border-b-1 border-blueGray-300" />
 
-                {/* <h6 className="text-blueGray-400 text-sm mt-3 mb-6 font-bold uppercase">
-                  About Me
-                </h6> */}
                 <div className="flex flex-wrap mt-4">
                   <div className="w-full lg:w-12/12 px-4">
                     <div className="relative w-full mb-3">
@@ -524,20 +472,7 @@ const Cart = () => {
                           }}
                         />
                       </label>
-                      {/* <input
-                        type="number"
-                        className="border-2 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                        value={orderinfo.days ?? ""} // Use empty string if days is null
-                        onChange={(e) =>
-                          setOrderInfo({
-                            ...orderinfo,
-                            days: e.target.value
-                              ? Number(e.target.value)
-                              : null, // Convert to number or set to null
-                          })
-                        }
-                        required={true}
-                      /> */}
+
                       <select
                         className="border-2 px-2 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                         value={orderinfo.days ?? ""} // Use empty string if days is null
@@ -593,8 +528,13 @@ const Cart = () => {
                     Clear All
                   </button>
                   <button
-                    className="bg-[#ad0000] text-white active:bg-[#2db9e6] font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md cursor-pointer outline-none focus:outline-none mr-1 ease-linear transition-all duration-150"
+                    className={`bg-[#ad0000] text-white font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md  outline-none focus:outline-none mr-1 ease-linear transition-all duration-150  ${
+                      cartBooks.length < 1
+                        ? "opacity-60 cursor-not-allowed"
+                        : "cursor-pointer"
+                    }`}
                     type="submit"
+                    disabled={cartBooks.length < 1}
                   >
                     Place Order
                   </button>

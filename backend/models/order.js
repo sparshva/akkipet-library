@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
-import validator from "validator"; // npm install validator
+const mongoose = require("mongoose");
+const validator = require("validator");
 
 const orderSchema = new mongoose.Schema(
   {
@@ -86,4 +86,4 @@ const orderSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model("Order", orderSchema);
+module.exports = mongoose.model("Order", orderSchema);

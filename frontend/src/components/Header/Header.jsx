@@ -81,7 +81,7 @@ const Header = () => {
             </div>
           </div>
 
-          {windowWidth <= 768 ? (
+          {windowWidth < 768 ? (
             <button
               onClick={toggleMenu}
               className="inline-flex ml-4  items-center justify-center p-2 rounded-md  focus:outline-none focus:ring-2 focus:ring-inset "

@@ -3,16 +3,6 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 
-// import img10 from "../../images/img10.jpg";
-// import img2 from "../../images/img2.jpg";
-// import img3 from "../../images/img3.jpg";
-// import img4 from "../../images/img4.jpg";
-// import img5 from "../../images/img5.jpg";
-// import img6 from "../../images/img6.jpg";
-// import img7 from "../../images/img7.jpg";
-// import img8 from "../../images/img8.jpg";
-// import img9 from "../../images/img9.jpg";
-
 const img10 = process.env.PUBLIC_URL + "/images/img10.jpg";
 const img2 = process.env.PUBLIC_URL + "/images/img2.jpg";
 const img3 = process.env.PUBLIC_URL + "/images/img3.jpg";
@@ -61,18 +51,6 @@ const Carousel = () => {
     {
       url: img9,
     },
-    // {
-    //   url: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2670&q=80",
-    // },
-    // {
-    //   url: "https://images.unsplash.com/photo-1661961112951-f2bfd1f253ce?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2672&q=80",
-    // },
-    // {
-    //   url: "https://images.unsplash.com/photo-1512756290469-ec264b7fbf87?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2253&q=80",
-    // },
-    // {
-    //   url: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2671&q=80",
-    // },
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -122,7 +100,7 @@ const Carousel = () => {
         <ChevronLeftIcon size={30} />
       </div>
       <div
-        className=" group-hover:block absolute top-[50%] -translate-x-0 translate-y-[-50%] right-5 text-2xl rounded-full p-2 bg-black/20 text-white cursor-pointer"
+        className=" group-hover:block absolute top-[50%] -translate-x-0 translate-y-[-50%] right-5 text-1xl rounded-full p-2 bg-black/20 text-white cursor-pointer"
         onClick={nextSlide}
       >
         <ChevronRightIcon size={30} />

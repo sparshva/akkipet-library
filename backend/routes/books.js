@@ -1,15 +1,15 @@
-import express from "express";
-import {
+const express = require("express");
+const {
   getAllBooks,
   getBooksByFilterRequest,
   getUniqueValues,
   deleteSelectedBooks,
   uploadBooks,
   exportBooks,
-} from "../controllers/books.js";
-import { authenticateAdmin } from "../middlewares/user.js";
-import { upload } from "../middlewares/upload.js";
-import multer from "multer";
+} = require("../controllers/books.js");
+const { authenticateAdmin } = require("../middlewares/user.js");
+const { upload } = require("../middlewares/upload.js");
+const multer = require("multer");
 
 const router = express.Router();
 
@@ -25,4 +25,4 @@ router.get("/unique", getUniqueValues);
 
 router.delete("/delete", authenticateAdmin, deleteSelectedBooks);
 
-export default router;
+module.exports = router;

@@ -24,7 +24,7 @@ import ContactUs from "./components/ContactUs/ContactUs.jsx";
 
 function App() {
   const { isAuthenticated } = useAuth();
-  console.log("App");
+  // console.log("App");
   return (
     <AppProvider>
       {" "}

@@ -1,5 +1,5 @@
-import express from "express";
-import {
+const express = require("express");
+const {
   createOrders,
   updateOrderStatus,
   processReturn,
@@ -7,8 +7,8 @@ import {
   getOrdersGroupedByStatus,
   exportOrders,
   getTotalCountOfOrders,
-} from "../controllers/orders.js";
-import { authenticateAdmin } from "../middlewares/user.js"; // Import the adminMiddleware
+} = require("../controllers/orders.js");
+const { authenticateAdmin } = require("../middlewares/user.js"); // Import the adminMiddleware
 
 const router = express.Router();
 
@@ -28,4 +28,6 @@ router.get(
 
 router.get("/total-orders", getTotalCountOfOrders);
 
-export default router;
+router.post("/orders/by-phone-number", getOrdersByPhoneNumber);
+
+module.exports = router;

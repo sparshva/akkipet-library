@@ -168,12 +168,6 @@ function Row({ row, selectedBooks, setSelectedBooks, windowWidth }) {
                 <strong>Book Details</strong>
               </Typography>
               <Table size="small" aria-label="book-details">
-                {/* <TableHead>
-                  <TableRow>
-                    <TableCell>Detail</TableCell>
-                    <TableCell>Value</TableCell>
-                  </TableRow>
-                </TableHead> */}
                 <TableBody>
                   <TableRow>
                     <TableCell
@@ -323,8 +317,8 @@ const UserSideCollapsibleTable = ({
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-  console.log("windowWidth", windowWidth);
-  console.log("Selected books:", selectedBooks);
+  // console.log("windowWidth", windowWidth);
+  // console.log("Selected books:", selectedBooks);
   // console.log(books);
   return (
     <>

@@ -12,7 +12,7 @@ const AdminLogin = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    console.log("AdminLogin token: " + token, token);
+    // console.log("AdminLogin token: " + token, token);
     if (token) navigate("/admin/manage/orders", { replace: true });
   }, [navigate]);
 
@@ -25,7 +25,7 @@ const AdminLogin = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    console.log(loginInfo);
+    // console.log(loginInfo);
 
     // Replace with your actual API endpoint
     const apiEndpoint = `${process.env.REACT_APP_BACKEND_BASE_URL}/user/login`;
@@ -38,9 +38,9 @@ const AdminLogin = () => {
           pending: "Logging in... Please wait.",
           success: {
             render({ data }) {
-              console.log(data); // Log the response data for debugging
+              // console.log(data); // Log the response data for debugging
               localStorage.setItem("token", data.data.token);
-              console.log(localStorage.getItem("token"));
+              // console.log(localStorage.getItem("token"));
               setIsLoggedIn(true);
               navigate("/admin/manage/orders"); // Navigate to orders page
               return "Login successful!"; // Show success message

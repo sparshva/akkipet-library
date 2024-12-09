@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import UserSideCollapsibleTable from "../CollapsibleTable/UserSideCollapsibleTable";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -64,7 +64,7 @@ const SearchBooks = () => {
   const [showOrderPlaceModal, setShowOrderPlaceModal] = useState(false);
   const [totalBooks, setTotalBooks] = useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
-
+  const abortControllerRef = useRef(null);
   //   const [selectedBooks, setSelectedBooks] = useState([]);
   const { cartBooks, setCartBooks, clearAll } = useContext(AppContext); // Consume the context
   const [selectedBooks, setSelectedBooks] = useState([]);
@@ -89,16 +89,22 @@ const SearchBooks = () => {
   const navigate = useNavigate();
   const fetchFilteredBooks = async (activeFilters, page) => {
     try {
-      console.log("filters", activeFilters);
-      console.log(process.env);
-      console.log(
-        `${process.env.REACT_APP_BACKEND_BASE_URL}/books/filter?page=${page}`
-      );
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      // Create a new AbortController
+      const newController = new AbortController();
+      abortControllerRef.current = newController;
+
       const response = await axios.post(
         `${process.env.REACT_APP_BACKEND_BASE_URL}/books/filter?page=${page}`,
-        activeFilters // Send full filters object
+        activeFilters, // Send full filters object
+        {
+          signal: newController.signal, // Attach the signal for cancellation
+        }
       );
-      console.log(response);
+      // console.log(response);
       setBooks(response.data.results);
       setTotalBooks(response.data.totalCount);
       // toast.success("Books fetched successfully", {
@@ -107,23 +113,15 @@ const SearchBooks = () => {
       setLoading(false);
       //   console.log("Fetched books:", response.data);
     } catch (error) {
-      console.error("Error fetching books:", error);
-      toast.error("Error fetching books", {
-        //
-      });
+      if (error.name === "CanceledError") {
+        console.log("Request was canceled:", error.message);
+      } else {
+        console.error("Error fetching books:", error);
+        toast.error("Error fetching books");
+      }
     }
   };
-  const fetchAllBooks = async () => {
-    try {
-      const response = await axios.get(`http://localhost:3001/books/`);
-      const totalPages = Math.ceil(response.data.length / 20);
-      setTotalBooks(response.data.length);
-      //   setBooks(response.data);
-      console.log("Fetched books:", response.data);
-    } catch (error) {
-      console.error("Error fetching books:", error);
-    }
-  };
+
   const fetchCategories = async () => {
     try {
       const response = await axios.get(
@@ -140,13 +138,13 @@ const SearchBooks = () => {
       ];
 
       // Log the formatted categories for debugging
-      console.log("Formatted Categories:", formattedCategories);
+      // console.log("Formatted Categories:", formattedCategories);
 
       setCategories(formattedCategories);
-      console.log("Fetched categories:", response.data);
+      // console.log("Fetched categories:", response.data);
       // toast.success("Categories fetched successfully", {});
     } catch (error) {
-      console.error("Error fetching categories:", error);
+      // console.error("Error fetching categories:", error);
       toast.error("Error fetching categories", {});
     }
   };
@@ -183,12 +181,12 @@ const SearchBooks = () => {
     event.preventDefault();
     setShowFilterModal(false);
     setLoading(true); // Show loading while fetching data
-    console.log("Apply filters");
+    // console.log("Apply filters");
     debouncedFetchBooks(filters, 1); // Call the debounced API with updated filters
   };
 
   const handleClearFilters = (event) => {
-    console.log("Clear filters");
+    // console.log("Clear filters");
 
     // Clear the filters and then fetch books with cleared filters
     setFilters((prevFilters) => {
@@ -207,15 +205,10 @@ const SearchBooks = () => {
     });
   };
 
-  const handlePageChange = (event, value) => {
-    console.log(value);
-    setPage(value);
-    debouncedFetchBooks(filters, value); // Call the debounced
-  };
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
     debouncedFetchBooks(filters, newPage + 1);
-    console.log("Change page", newPage);
+    // console.log("Change page", newPage);
   };
 
   const handleChangeRowsPerPage = (event) => {
@@ -243,14 +236,6 @@ const SearchBooks = () => {
       ),
     ]);
 
-    // Save the selected books to localStorage
-    // localStorage.setItem(
-    //   "cartBooks",
-    //   JSON.stringify([...cartBooks, ...selectedBooks])
-    // );
-
-    // Clear the selectedBooks after adding to cart
-    // console.log("clearing the books selected");
     setSelectedBooks([]);
 
     // Navigate to the cart page
@@ -260,8 +245,6 @@ const SearchBooks = () => {
     // console.log("Selected books", [...cartBooks, ...selectedBooks]);
   };
 
-  console.log("Active filters", hasActiveFilters());
-  //   console.log(books);
   return (
     <>
       <div
@@ -269,11 +252,6 @@ const SearchBooks = () => {
           windowWidth < 450 ? "px-4" : "px-8" // Example condition based on window size
         }`}
       >
-        {/* <div
-          className={`flex items-center fixed top-0 left-0 right-0  z-10 justify-between ${
-            windowWidth < 450 ? "p-[1rem]" : "py-[1.1rem] px-[2rem]" // Example condition based on window size
-          }  `}
-        > */}
         <div
           className={`flex items-center bg-[#fafafa] overflow-hidden sticky top-0 left-0 right-0 bottom-0 pb-4 z-10 justify-between mb-6 `}
         >
@@ -306,18 +284,7 @@ const SearchBooks = () => {
               ) : (
                 <FilterAltOutlinedIcon sx={{ fontSize: "30px" }} />
               )}{" "}
-              <span
-                className="text-[18px] px-[6px] "
-                // style={{
-                //   color: "#137d9f",
-                //   fontSize: "19px",
-                //   //   fontWeight: "bold",
-                //   padding: "0 6px",
-                // }}
-              >
-                {" "}
-                Filter
-              </span>
+              <span className="text-[18px] px-[6px] "> Filter</span>
             </div>
           </div>
         </div>
@@ -344,41 +311,6 @@ const SearchBooks = () => {
             )}
           </div>
           <div className="  flex justify-end  items-center ">
-            {/* <Stack>
-              <Pagination
-                count={Math.ceil(totalBooks / 20)}
-                page={page}
-                siblingCount={0}
-                boundaryCount={1}
-                shape="rounded"
-                onChange={handlePageChange}
-                size="large"
-                sx={{
-                  "& .MuiPaginationItem-root": {
-                    fontSize:
-                      windowWidth > 400
-                        ? "1.2rem"
-                        : windowWidth > 360
-                        ? "1.1rem"
-                        : "0.9rem",
-                  },
-                  "& .MuiPaginationItem-icon": {
-                    fontSize:
-                      windowWidth > 400
-                        ? "1.3rem"
-                        : windowWidth > 360
-                        ? "1.1rem"
-                        : "1rem",
-                  },
-                }}
-                renderItem={(item) => (
-                  <PaginationItem
-                    slots={{ previous: ArrowBackIcon, next: ArrowForwardIcon }}
-                    {...item}
-                  />
-                )}
-              />
-            </Stack> */}
             <TablePagination
               rowsPerPageOptions={[]} // Removes dropdown options
               colSpan={3}
@@ -443,7 +375,7 @@ const SearchBooks = () => {
                   debouncedFetchBooks={debouncedFetchBooks}
                 />
               </div>
-              <div className="mt-6 w-full flex justify-end ">
+              <div className="mt-6 w-full flex justify-end font-semibold">
                 <button
                   onClick={(e) => handleClearFilters(e)}
                   className="px-4 py-1 border border-[#ad0000]  rounded-lg  "

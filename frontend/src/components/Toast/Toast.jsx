@@ -9,7 +9,7 @@ export const Toast = () => {
     // <div className="w-full h-screen flex justify-center items-center">
     <ToastContainer
       position="top-center"
-      autoClose={2000}
+      autoClose={3000}
       hideProgressBar={true}
       closeButton={false}
       newestOnTop={false}

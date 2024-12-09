@@ -30,155 +30,9 @@ const OrdersHistory = ({ allOrders, setAllOrders, exportOrders }) => {
     setFilteredOrders(filtered);
   }, [searchQuery, allOrders]); // Add allOrders to dependencies here
 
-  const orders = [
-    // {
-    //   id: "ORD001",
-    //   bookName: "The Art of Programming",
-    //   bookId: "BK789",
-    //   user: {
-    //     name: "John Doe",
-    //     address: "123 Tech Street, Silicon Valley",
-    //     phone: "+1 234 567 8900",
-    //     email: "john@example.com",
-    //     extraInfo: "Preferred delivery time: Evening",
-    //   },
-    // },
-    // {
-    //   id: "ORD002",
-    //   bookName: "Data Structures Explained",
-    //   bookId: "BK456",
-    //   user: {
-    //     name: "Jane Smith",
-    //     address: "456 Code Avenue, Tech City",
-    //     phone: "+1 987 654 3210",
-    //     email: "jane@example.com",
-    //     extraInfo: "Leave package at reception",
-    //   },
-    // },
-    // {
-    //   id: "ORD003",
-    //   bookName: "Web Development Guide",
-    //   bookId: "BK123",
-    //   user: {
-    //     name: "Mike Johnson",
-    //     address: "789 Dev Lane, Programming Park",
-    //     phone: "+1 456 789 0123",
-    //     email: "mike@example.com",
-    //     extraInfo: "Call before delivery",
-    //   },
-    // },
-  ];
-
   const handleAccordionClick = (index) => {
     setActiveAccordion(activeAccordion === index ? null : index);
     setError("");
-  };
-
-  const handleAccept = (orderId) => {
-    try {
-      // Simulating API call
-      console.log(`Order ${orderId} accepted`);
-      setError("");
-    } catch (err) {
-      setError(`Failed to accept order ${orderId}`);
-    }
-  };
-
-  const handleReject = (orderId) => {
-    try {
-      // Simulating API call
-      console.log(`Order ${orderId} rejected`);
-      setError("");
-    } catch (err) {
-      setError(`Failed to reject order ${orderId}`);
-    }
-  };
-
-  console.log("inside history", allOrders);
-  //   const handleFileExport = async () => {
-  //     try {
-  //       console.log("export");
-  //       const response = await axios.post(
-  //         "http://localhost:3001/order/export",
-  //         {
-  //           statuses: ["REJECTED", "RETURNED"],
-  //         },
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${localStorage.getItem("token")}`,
-  //           },
-  //         }
-  //       );
-
-  //       // Create a Blob from the response data and trigger download
-  //       const blob = new Blob([response.data], { type: "text/csv" });
-  //       const url = window.URL.createObjectURL(blob);
-  //       const a = document.createElement("a");
-  //       a.href = url;
-  //       a.setAttribute("download", "orders-history.csv"); // Filename for download
-  //       document.body.appendChild(a);
-  //       a.click();
-  //       a.remove();
-  //       toast.success("Data exported successfully!");
-  //     } catch (error) {
-  //       console.error("Error exporting data:", error);
-  //       toast.error("Error exporting data");
-  //     }
-  //   };
-  const handleFileExport = async () => {
-    const confirmAction = window.confirm(
-      "Are you sure you want to export the rejected and returned orders?"
-    );
-    if (!confirmAction) return;
-
-    try {
-      await toast.promise(
-        axios.post(
-          `${process.env.REACT_APP_BACKEND_BASE_URL}/order/export`,
-          {
-            statuses: ["REJECTED", "RETURNED", "ACCEPTED"],
-            searchQuery,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-            responseType: "blob", // Expect a blob for download
-          }
-        ),
-        {
-          pending: "Exporting data...",
-          success: "Data exported successfully!",
-          error: "Error exporting data.",
-        }
-      );
-
-      // Once the export is successful, create a Blob and trigger download
-      const response = await axios.post(
-        "http://localhost:3001/order/export",
-        {
-          statuses: ["REJECTED", "RETURNED", "ACCEPTED"],
-          searchQuery,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          responseType: "blob",
-        }
-      );
-
-      const blob = new Blob([response.data], { type: "text/csv" });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.setAttribute("download", "orders-history.csv"); // Set filename for download
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    } catch (error) {
-      console.error("Error exporting data:", error);
-    }
   };
 
   const handleRejectedAndReturnedOrdersExport = () => {
@@ -278,7 +132,7 @@ const OrdersHistory = ({ allOrders, setAllOrders, exportOrders }) => {
                     <div className="space-y-2">
                       <p className="text-gray-700">
                         <span className="font-medium">Sahebji Name:</span>{" "}
-                        {order.sahebjName}
+                        {order.sahebjiName}
                       </p>
                       <p className="text-gray-700">
                         <span className="font-medium">Samuday:</span>{" "}
@@ -306,43 +160,98 @@ const OrdersHistory = ({ allOrders, setAllOrders, exportOrders }) => {
                         {order.pinCode}
                       </p>
                       <p className="text-gray-700">
-                        <span className="font-medium">Additional Info:</span>{" "}
-                        {order.extraInfo}
+                        <span className="font-medium">Requested for days:</span>{" "}
+                        {order.days}
                       </p>
-                      {order.orderStatus == "RETURNED" && (
-                        <p className="text-gray-700">
-                          <span className="font-medium">Return Date:</span>{" "}
-                          {(() => {
-                            const date = new Date(order.returnDate);
-                            const day = String(date.getDate()).padStart(2, "0"); // Ensure two digits
-                            const month = String(date.getMonth() + 1).padStart(
-                              2,
-                              "0"
-                            ); // Months are 0-based
-                            const year = date.getFullYear();
-                            return `${day}/${month}/${year}`; // Format as DD/MM/YYYY
-                          })()}{" "}
-                        </p>
+                      <p className="text-gray-700">
+                        <span className="font-medium">Additional Info:</span>{" "}
+                        {order.extraInfo}{" "}
+                      </p>
+                      <p className="text-gray-700">
+                        <span className="font-medium">Received Date:</span>{" "}
+                        {(() => {
+                          const date = new Date(order.createdAt);
+                          const day = String(date.getDate()).padStart(2, "0"); // Ensure two digits
+                          const month = String(date.getMonth() + 1).padStart(
+                            2,
+                            "0"
+                          ); // Months are 0-based
+                          const year = date.getFullYear();
+                          return `${day}/${month}/${year}`; // Format as DD/MM/YYYY
+                        })()}{" "}
+                      </p>
+                      {(order.orderStatus === "ACCEPTED" ||
+                        order.orderStatus === "RETURNED") && (
+                        <>
+                          <p className="text-gray-700">
+                            <span className="font-medium">Accepted By:</span>{" "}
+                            {order.acceptedOrRejectedBy}
+                          </p>
+                          <p className="text-gray-700">
+                            <span className="font-medium">Accepted At:</span>{" "}
+                            {(() => {
+                              const date = new Date(order.acceptedOrRejectedAt);
+                              const day = String(date.getDate()).padStart(
+                                2,
+                                "0"
+                              );
+                              const month = String(
+                                date.getMonth() + 1
+                              ).padStart(2, "0");
+                              const year = date.getFullYear();
+                              return `${day}/${month}/${year}`;
+                            })()}
+                          </p>
+                        </>
                       )}
 
-                      {/* <div className="flex gap-4 mt-4 pt-2 border-t border-gray-100">
-                  <button
-                    onClick={() => handleAccept(order.id)}
-                    className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-md transition-colors duration-300 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                    aria-label="Accept order"
-                  >
-                    <FaCheckCircle />
-                    Accept
-                  </button>
-                  <button
-                    onClick={() => handleReject(order.id)}
-                    className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-md transition-colors duration-300 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                    aria-label="Reject order"
-                  >
-                    <FaTimesCircle />
-                    Reject
-                  </button>
-                </div> */}
+                      {order.orderStatus === "REJECTED" && (
+                        <>
+                          <p className="text-gray-700">
+                            <span className="font-medium">Rejected By:</span>{" "}
+                            {order.acceptedOrRejectedBy}
+                          </p>
+                          <p className="text-gray-700">
+                            <span className="font-medium">Rejected At:</span>{" "}
+                            {(() => {
+                              const date = new Date(order.acceptedOrRejectedAt);
+                              const day = String(date.getDate()).padStart(
+                                2,
+                                "0"
+                              );
+                              const month = String(
+                                date.getMonth() + 1
+                              ).padStart(2, "0");
+                              const year = date.getFullYear();
+                              return `${day}/${month}/${year}`;
+                            })()}
+                          </p>
+                        </>
+                      )}
+
+                      {order.orderStatus === "RETURNED" && (
+                        <>
+                          <p className="text-gray-700">
+                            <span className="font-medium">Returned By:</span>{" "}
+                            {order.returnAcceptedBy}
+                          </p>
+                          <p className="text-gray-700">
+                            <span className="font-medium">Return Date:</span>{" "}
+                            {(() => {
+                              const date = new Date(order.returnDate);
+                              const day = String(date.getDate()).padStart(
+                                2,
+                                "0"
+                              );
+                              const month = String(
+                                date.getMonth() + 1
+                              ).padStart(2, "0");
+                              const year = date.getFullYear();
+                              return `${day}/${month}/${year}`;
+                            })()}
+                          </p>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>

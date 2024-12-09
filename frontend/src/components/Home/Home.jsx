@@ -6,7 +6,49 @@ import { toast } from "../Toast/Toast";
 import axios from "axios";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
 import LibraryBooksRoundedIcon from "@mui/icons-material/LibraryBooksRounded";
-// https://akkipet-library-1.onrender.com
+// https://api.akkipetgyanbhandar.in
+
+const RollingCounter = ({ total, label, Icon, colorClass, bgColorClass }) => {
+  const [displayCount, setDisplayCount] = useState(0);
+
+  useEffect(() => {
+    let start = 0;
+    const duration = 1000; // Duration of the animation in milliseconds
+    const increment = total / (duration / 10); // Increment per frame (~10ms)
+
+    const counter = setInterval(() => {
+      start += increment;
+      if (start >= total) {
+        clearInterval(counter);
+        setDisplayCount(total); // Ensure it ends at the exact total
+      } else {
+        setDisplayCount(Math.ceil(start));
+      }
+    }, 10); // Update every 10ms
+
+    return () => clearInterval(counter); // Cleanup on unmount
+  }, [total]);
+
+  return (
+    <div
+      className="flex items-center p-4 bg-white rounded-lg"
+      style={{
+        boxShadow:
+          "rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px",
+      }}
+    >
+      <div className={`p-3 mr-4 ${colorClass} ${bgColorClass} rounded-full`}>
+        <Icon />
+      </div>
+      <div>
+        <p className="mb-2 text-sm font-medium text-gray-600">
+          <strong>{label}</strong>
+        </p>
+        <p className="text-lg font-semibold text-gray-700">{displayCount}</p>
+      </div>
+    </div>
+  );
+};
 
 const Home = () => {
   const navigate = useNavigate();
@@ -14,27 +56,14 @@ const Home = () => {
   const [totalBooks, setTotalBooks] = useState(0);
   const fetchFilteredBooks = async (activeFilters, page) => {
     try {
-      console.log("filters", activeFilters);
-      console.log(process.env);
-      // console.log(`https://akkipet-library.vercel.app/books/filter?page=${1}`);
-      // axios.defaults.withCredentials = true;
-      // Ensure this value is set correctly before using it
       const response = await axios.post(
         `${process.env.REACT_APP_BACKEND_BASE_URL}/books/filter?page=${1}`,
         activeFilters // Send full filters object
-        // { withCredentials: true } // Make sure to include this for CORS with credentials
       );
-      console.log(response);
+      // console.log(response);
       setTotalBooks(response.data.totalCount);
-      // toast.success("Books fetched successfully", {
-      //   //
-      // });
-      //   console.log("Fetched books:", response.data);
     } catch (error) {
       console.error("Error fetching books:", error);
-      toast.error("Error fetching books", {
-        //
-      });
     }
   };
 
@@ -47,43 +76,18 @@ const Home = () => {
 
   const [totalOrders, setTotalOrders] = useState(0);
 
-  // const fetchAllOrders = async () => {
-  //   try {
-  //     await toast.promise(
-  //       axios.get(
-  //         `${process.env.REACT_APP_BACKEND_BASE_URL}/order/total-orders`
-  //       ),
-  //       {
-  //         pending: "Fetching orders...",
-  //         success: {
-  //           render({ data }) {
-  //             setTotalOrders(data.data.totalOrders); // Set the data from response
-  //             console.log("Fetched orders:", data);
-  //             // return "Orders fetched successfully!";
-  //           },
-  //         },
-  //         error: "Error fetching orders",
-  //       }
-  //     );
-
-  //   } catch (error) {
-  //     console.error("Error fetching orders:", error);
-  //     toast.error("Error fetching orders");
-  //   }
-  // };
-
   const fetchAllOrders = async () => {
     try {
       const response = await axios.get(
         `${process.env.REACT_APP_BACKEND_BASE_URL}/order/total-orders`
       );
-      console.log("orders total", response.data.totalOrders);
+      // console.log("orders total", response.data.totalOrders);
       setTotalOrders(response.data?.totalOrders); // Set the data from response
-      console.log("Fetched orders:", response.data);
+      // console.log("Fetched orders:", response.data);
       // toast.success("Orders fetched successfully!");
     } catch (error) {
-      console.error("Error fetching orders:", error);
-      toast.error("Error fetching orders");
+      // console.error("Error fetching orders:", error);
+      toast.error("Error fetching details");
     }
   };
 
@@ -112,7 +116,7 @@ const Home = () => {
       <div className="w-full py-8 flex justify-center items-center">
         <button
           type="button"
-          className="text-white w-2/3 bg-[#ad0000] focus:outline-none  font-medium rounded-md text-[16px] px-4 py-2 text-center mb-2"
+          className="text-white w-2/3 min-w-fit bg-[#ad0000] focus:outline-none  font-medium rounded-md text-[16px] px-4 py-2 text-center mb-2"
           onClick={navigateToSearchPage}
         >
           Search Books / पुस्तकें खोजें
@@ -121,9 +125,9 @@ const Home = () => {
       <div className="px-5">
         {/* <div class="  mx-auto grid"> */}
         {/* <!-- Cards --> */}
-        <div class="grid gap-6 mb-8 sm:grid-cols-2 ">
+        <div class="grid gap-6 mb-6 sm:grid-cols-2 ">
           {/* <!-- Card --> */}
-          <div
+          {/* <div
             class="flex items-center p-4 bg-white rounded-lg  "
             style={{
               boxShadow:
@@ -139,25 +143,22 @@ const Home = () => {
               </p>
               <p class="text-lg font-semibold text-gray-700 ">{totalOrders}</p>
             </div>
-          </div>
-          {/* <!-- Card --> */}
-          <div
-            class="flex items-center p-4 bg-white rounded-lg  "
-            style={{
-              boxShadow:
-                " rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px",
-            }}
-          >
-            <div class="p-3 mr-4 text-green-500 bg-green-100 rounded-full ">
-              <LibraryBooksRoundedIcon />
-            </div>
-            <div>
-              <p class="mb-2 text-sm font-medium text-gray-600 ">
-                <strong>Total Books</strong>
-              </p>
-              <p class="text-lg font-semibold text-gray-700 ">{totalBooks}</p>
-            </div>
-          </div>
+          </div> */}
+
+          <RollingCounter
+            total={totalOrders}
+            label="Total Orders"
+            Icon={LocalShippingOutlinedIcon}
+            colorClass="text-orange-500"
+            bgColorClass="bg-orange-100"
+          />
+          <RollingCounter
+            total={totalBooks}
+            label="Total Books"
+            Icon={LibraryBooksRoundedIcon}
+            colorClass="text-green-500"
+            bgColorClass="bg-green-100"
+          />
         </div>
         {/* </div> */}
       </div>
@@ -169,9 +170,12 @@ const Home = () => {
               " rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px",
           }}
         >
-          <div className="font-semibold text-[#ff1414] text-[20px] mb-6">
+          <div className="flex items-center justify-center font-semibold text-[#ff1414] text-[20px] mb-6 relative">
+            <span className="text-[#ff1414] mx-2">★</span>
             <strong>सूचना पत्र</strong>
+            <span className="text-[#ff1414] mx-2">★</span>
           </div>
+
           <div className="font-semibold  text-[16px] mb-3">
             श्रुतपिपासु श्रमण श्रमणी भगवंत को वंदन | श्रावक श्राविका को प्रणाम |
             हमारे ज्ञान भंडार को लाभ देने के लिए धन्यवाद | ज्ञान भंडार की

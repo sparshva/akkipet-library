@@ -55,7 +55,7 @@ const Filter = React.memo(
       const category = categories.find((c) => c.id === selectedCategory);
 
       if (!category) return [];
-      console.log("Filtering category", category);
+      // console.log("Filtering category", category);
 
       const filtered = category.values.filter((value) =>
         value.toLowerCase().includes(searchTerm.toLowerCase())
@@ -72,7 +72,7 @@ const Filter = React.memo(
     };
 
     //   console.log(filters["authors"].length);
-    console.log("filtered values", filteredValues);
+    // console.log("filtered values", filteredValues);
 
     return (
       <div className=" mx-auto  md:p-4  h-[50vh]">

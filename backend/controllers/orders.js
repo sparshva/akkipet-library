@@ -1,14 +1,14 @@
-import Order from "../models/order.js"; // Assuming you have the Order schema
-import Book from "../models/book.js"; // Assuming you have the Book schema
+const Order = require("../models/order.js"); // Assuming you have the Order schema
+const Book = require("../models/book.js"); // Assuming you have the Book schema
 
-import fs from "fs";
-import ExcelJS from "exceljs";
-import path from "path";
+const fs = require("fs");
+const ExcelJS = require("exceljs");
+const path = require("path");
 
-export const createOrders = async (req, res) => {
+const createOrders = async (req, res) => {
   const session = await Book.startSession();
   session.startTransaction(); // Start a transaction
-  console.log(req.body);
+  // console.log(req.body);
 
   try {
     const {
@@ -54,7 +54,7 @@ export const createOrders = async (req, res) => {
               (availBook) => availBook.serialNumber === book.serialNumber
             )
         )
-        .map((book) => `${book.serialNumber} (${book.name})`)
+        .map((book) => `${book.serialNumber} (${book.nameInHindi})`)
         .join(", ");
 
       await session.abortTransaction();
@@ -83,20 +83,20 @@ export const createOrders = async (req, res) => {
       );
 
       // Create a new order for the book
-      console.log({
-        sahebjiName,
-        samuday,
-        contactName,
-        contactNumber,
-        address,
-        city,
-        pinCode,
-        days,
-        orderStatus: "PENDING",
-        bookSerialNumber: serialNumber,
-        bookName: nameInHindi,
-        extraInfo,
-      });
+      // console.log({
+      //   sahebjiName,
+      //   samuday,
+      //   contactName,
+      //   contactNumber,
+      //   address,
+      //   city,
+      //   pinCode,
+      //   days,
+      //   orderStatus: "PENDING",
+      //   bookSerialNumber: serialNumber,
+      //   bookName: nameInHindi,
+      //   extraInfo,
+      // });
       const newOrder = new Order({
         sahebjiName,
         samuday,
@@ -137,66 +137,79 @@ export const createOrders = async (req, res) => {
   }
 };
 
-export const updateOrderStatus = async (req, res) => {
-  console.log("process update ");
-  const { orderId, action } = req.params;
-  console.log("order id ", orderId, " action ", action);
-  const order = await Order.findById(orderId);
-  console.log("update order status ");
+const updateOrderStatus = async (req, res) => {
+  try {
+    // console.log("process update ");
+    const { orderId, action } = req.params;
+    // console.log("order id ", orderId, " action ", action);
 
-  if (!order) return res.status(404).json({ message: "Order not found" });
+    const order = await Order.findById(orderId);
+    // console.log("update order status ");
 
-  if (action === "accept") {
-    order.orderStatus = "ACCEPTED";
-  } else if (action === "reject") {
-    order.orderStatus = "REJECTED";
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    if (action === "accept") {
+      order.orderStatus = "ACCEPTED";
+    } else if (action === "reject") {
+      order.orderStatus = "REJECTED";
+      await Book.findOneAndUpdate(
+        { serialNumber: order.bookSerialNumber }, // Query based on serial number
+        { status: "AVAILABLE" }, // Update operation
+        { new: true } // Option to return the updated document
+      );
+    }
+
+    order.acceptedOrRejectedBy = req.user.name;
+    order.updatedAt = new Date();
+    order.acceptedOrRejectedAt = new Date();
+    // console.log("order updated");
+
+    await order.save();
+    res.status(200).json(order);
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
+const processReturn = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const order = await Order.findById(orderId);
+    // console.log("process return ");
+    // console.log("order id ", orderId);
+
+    if (!order || order.orderStatus !== "ACCEPTED") {
+      return res
+        .status(400)
+        .json({ message: "Order not found or not in ACCEPTED status" });
+    }
+
+    // Update the order status to RETURNED and set the return date
+    order.returnAcceptedBy = req.user.name;
+    order.orderStatus = "RETURNED";
+    order.returnDate = new Date();
+
+    // Update the book's status to AVAILABLE
     await Book.findOneAndUpdate(
       { serialNumber: order.bookSerialNumber }, // Query based on serial number
       { status: "AVAILABLE" }, // Update operation
       { new: true } // Option to return the updated document
     );
+
+    // Save order and store in history
+    await order.save();
+    res.status(200).json(order);
+  } catch (error) {
+    console.error("Error processing return:", error);
+    res.status(500).json({ message: "Server Error", error: error.message });
   }
-
-  order.acceptedOrRejectedBy = req.user.name;
-  order.updatedAt = new Date();
-  order.acceptedOrRejectedAt = new Date();
-  console.log("order updated");
-
-  await order.save();
-
-  res.status(200).json(order);
 };
 
-export const processReturn = async (req, res) => {
-  const { orderId } = req.params;
-  const order = await Order.findById(orderId);
-  console.log("process return ");
-  console.log("order id ", orderId);
-
-  if (!order || order.orderStatus !== "ACCEPTED") {
-    return res.status(400).json({ message: "Order not found" });
-  }
-
-  // Update the order status to RETURNED and set the return date
-  order.returnAcceptedBy = req.user.name;
-  order.orderStatus = "RETURNED";
-  order.returnDate = new Date();
-
-  // Update the book's status to AVAILABLE
-  await Book.findOneAndUpdate(
-    { serialNumber: order.bookSerialNumber }, // Query based on serial number
-    { status: "AVAILABLE" }, // Update operation
-    { new: true } // Option to return the updated document
-  );
-
-  // Save order and store in history
-  await order.save();
-
-  res.status(200).json(order);
-};
-
-export const getOrdersByPhoneNumber = async (req, res) => {
-  const { phoneNumber } = req.query; // Get phone number from query parameters
+const getOrdersByPhoneNumber = async (req, res) => {
+  const { phoneNumber } = req.body; // Get phone number from query parameters
 
   // Check if phone number is provided
   if (!phoneNumber) {
@@ -218,7 +231,7 @@ export const getOrdersByPhoneNumber = async (req, res) => {
   }
 };
 
-export const getTotalCountOfOrders = async (req, res) => {
+const getTotalCountOfOrders = async (req, res) => {
   try {
     // Fetch all orders
     const orders = await Order.find();
@@ -234,7 +247,7 @@ export const getTotalCountOfOrders = async (req, res) => {
   }
 };
 
-export const getOrdersGroupedByStatus = async (req, res) => {
+const getOrdersGroupedByStatus = async (req, res) => {
   try {
     // Fetch all orders
     const orders = await Order.find();
@@ -271,12 +284,12 @@ export const getOrdersGroupedByStatus = async (req, res) => {
   }
 };
 
-export const exportOrders = async (req, res) => {
+const exportOrders = async (req, res) => {
   const { statuses, searchQuery } = req.body;
 
   try {
-    console.log("exportOrders", statuses);
-    console.log("searchQuery", searchQuery);
+    // console.log("exportOrders", statuses);
+    // console.log("searchQuery", searchQuery);
 
     // Fetch all orders based on the provided statuses
     const orders = await Order.find({ orderStatus: { $in: statuses } });
@@ -306,16 +319,35 @@ export const exportOrders = async (req, res) => {
       { header: "Address", key: "address", width: 30 },
       { header: "City", key: "city", width: 15 },
       { header: "Pin Code", key: "pinCode", width: 10 },
-      { header: "Days", key: "days", width: 10 },
+      { header: "Required For Days", key: "days", width: 10 },
       { header: "Extra Info", key: "extraInfo", width: 20 },
       { header: "Order Status", key: "orderStatus", width: 15 },
       { header: "Book Serial Number", key: "bookSerialNumber", width: 15 },
       { header: "Book Name", key: "bookName", width: 25 },
-      { header: "Return Date", key: "returnDate", width: 15 },
-      { header: "Created At", key: "createdAt", width: 15 },
+
+      {
+        header: "Received Date",
+        key: "createdAt",
+        width: 15,
+      },
       {
         header: "Accepted or Rejected At",
         key: "acceptedOrRejectedAt",
+        width: 20,
+      },
+      {
+        header: "Accepted or Rejected By",
+        key: "acceptedOrRejectedBy",
+        width: 20,
+      },
+      {
+        header: "Return Date",
+        key: "returnDate",
+        width: 15,
+      },
+      {
+        header: "Return Accepted By",
+        key: "returnAcceptedBy",
         width: 20,
       },
     ];
@@ -338,9 +370,12 @@ export const exportOrders = async (req, res) => {
         orderStatus: order.orderStatus,
         bookSerialNumber: order.bookSerialNumber,
         bookName: order.bookName,
-        returnDate: formatDate(order.returnDate),
         createdAt: formatDate(order.createdAt),
         acceptedOrRejectedAt: formatDate(order.acceptedOrRejectedAt),
+        acceptedOrRejectedBy: order.acceptedOrRejectedBy,
+        returnDate: formatDate(order.returnDate),
+
+        returnAcceptedBy: order.returnAcceptedBy,
       });
     });
 
@@ -358,4 +393,14 @@ export const exportOrders = async (req, res) => {
     console.error("Error exporting orders:", error);
     res.status(500).json({ message: "Error exporting orders" });
   }
+};
+
+module.exports = {
+  exportOrders,
+  processReturn,
+  getOrdersByPhoneNumber,
+  getOrdersGroupedByStatus,
+  createOrders,
+  getTotalCountOfOrders,
+  updateOrderStatus,
 };

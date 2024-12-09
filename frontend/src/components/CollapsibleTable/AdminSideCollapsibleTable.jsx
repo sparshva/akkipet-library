@@ -95,7 +95,7 @@ function Row({ row, selectedBooks, setSelectedBooks, windowWidth }) {
               color: row.status != "AVAILABLE" ? "grey" : "inherit",
             }}
           >
-            {row.language}
+            {row.editor}
           </TableCell>
         )}
         {windowWidth > 950 && (
@@ -109,7 +109,7 @@ function Row({ row, selectedBooks, setSelectedBooks, windowWidth }) {
               color: row.status != "AVAILABLE" ? "grey" : "inherit",
             }}
           >
-            {row.topic}
+            {row.publisher}
           </TableCell>
         )}
         {windowWidth > 1050 && (
@@ -123,7 +123,21 @@ function Row({ row, selectedBooks, setSelectedBooks, windowWidth }) {
               color: row.status != "AVAILABLE" ? "grey" : "inherit",
             }}
           >
-            {row.editor}
+            {row.topic}
+          </TableCell>
+        )}
+        {windowWidth > 1250 && (
+          <TableCell
+            component="th"
+            scope="row"
+            align="left"
+            sx={{
+              padding: "0 20px",
+              fontSize: "16px",
+              color: row.status != "AVAILABLE" ? "grey" : "inherit",
+            }}
+          >
+            {row.language}
           </TableCell>
         )}
         <TableCell sx={{ padding: "0" }} align="center">
@@ -137,47 +151,13 @@ function Row({ row, selectedBooks, setSelectedBooks, windowWidth }) {
               checked={selectedBooks.some(
                 (book) => book.serialNumber === row.serialNumber
               )}
-              //   disabled={row.status != "AVAILABLE"}
+              disabled={row.status != "AVAILABLE"}
               // disabled={true}
             />
           </div>
         </TableCell>
       </TableRow>
-      {/* <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-          <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 1 }}>
-              <Typography variant="h6" gutterBottom component="div">
-                History
-              </Typography>
-              <Table size="small" aria-label="purchases">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Date</TableCell>
-                    <TableCell>Customer</TableCell>
-                    <TableCell align="right">Amount</TableCell>
-                    <TableCell align="right">Total price ($)</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {row.history.map((historyRow) => (
-                    <TableRow key={historyRow.date}>
-                      <TableCell component="th" scope="row">
-                        {historyRow.date}
-                      </TableCell>
-                      <TableCell>{historyRow.customerId}</TableCell>
-                      <TableCell align="right">{historyRow.amount}</TableCell>
-                      <TableCell align="right">
-                        {Math.round(historyRow.amount * row.price * 100) / 100}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Box>
-          </Collapse>
-        </TableCell>
-      </TableRow> */}
+
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
@@ -341,11 +321,11 @@ const AdminSideCollapsibleTable = ({
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-  console.log("windowWidth", windowWidth);
-  console.log("Selected books:", selectedBooks);
+  // console.log("windowWidth", windowWidth);
+  // console.log("Selected books:", selectedBooks);
 
   const deleteSelectedBooks = async () => {
-    console.log("Selected books to delete:", selectedBooks);
+    // console.log("Selected books to delete:", selectedBooks);
     const confirmAction = window.confirm(
       "Are you sure you want to delete the selected books?"
     );
@@ -367,7 +347,7 @@ const AdminSideCollapsibleTable = ({
           pending: "Deleting selected books...",
           success: {
             render({ data }) {
-              console.log("Deleted books response:", data);
+              // console.log("Deleted books response:", data);
               fetchFilteredBooks();
               return `${data.deletedCount} books deleted successfully!`;
             },
@@ -378,6 +358,7 @@ const AdminSideCollapsibleTable = ({
                 "Error deleting books:",
                 data.response.data.message
               );
+              window.alert(data.response.data.message);
               return data.response.data.message;
             },
           },
@@ -493,7 +474,6 @@ const AdminSideCollapsibleTable = ({
                 </div>
               )}
             </TableCell>
-            {/* <TableCell align="right">Fat&nbsp;(g)</TableCell> */}
           </TableRow>
         </TableHead>
         <TableBody>

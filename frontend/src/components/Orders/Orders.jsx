@@ -16,28 +16,11 @@ const Orders = () => {
   const navigate = useNavigate();
   useEffect(() => {
     const token = localStorage.getItem("token");
-    console.log("Orders token: " + token);
+    // console.log("Orders token: " + token);
     if (!token) navigate("/admin/login", { replace: true });
   }, [navigate]);
   const [allOrders, setAllOrders] = useState([]);
-  //   const fetchAllOrders = async () => {
-  //     try {
-  //       const response = await axios.get(
-  //         `http://localhost:3001/order/orders/grouped-by-status`,
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${localStorage.getItem("token")}`, // retrieve and set the token
-  //           },
-  //         }
-  //       );
 
-  //       setAllOrders(response.data);
-  //       //   setBooks(response.data);
-  //       console.log("Fetched orders:", response.data);
-  //     } catch (error) {
-  //       console.error("Error fetching books:", error);
-  //     }
-  //   };
   const fetchAllOrders = async () => {
     try {
       await toast.promise(
@@ -147,50 +130,6 @@ const Orders = () => {
     setError(false);
   };
 
-  const renderOrderContent = () => {
-    if (error) {
-      return (
-        <div className="p-4 text-center text-red-600 bg-red-100 rounded-lg">
-          Failed to load order details. Please try again.
-        </div>
-      );
-    }
-
-    const orders = dummyOrders[activeTab];
-
-    return (
-      <div className="grid  gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {orders.map((order) => (
-          <div
-            key={order.id}
-            className="p-4 transition-all duration-300 bg-white rounded-lg shadow-md hover:shadow-lg"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-lg font-semibold text-gray-800">
-                {order.id}
-              </span>
-              <span className="px-3 py-1 text-sm text-white bg-blue-500 rounded-full">
-                {order.status}
-              </span>
-            </div>
-            <div className="space-y-2">
-              <p className="text-gray-700">
-                <span className="font-medium">Customer:</span>{" "}
-                {order.customerName}
-              </p>
-              <p className="text-gray-700">
-                <span className="font-medium">Date:</span> {order.date}
-              </p>
-              <p className="text-gray-700">
-                <span className="font-medium">Total:</span> {order.total}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  };
-
   const exportOrders = async (statuses, searchQuery, filename, message) => {
     const confirmAction = window.confirm(message);
     if (!confirmAction) return;
@@ -288,8 +227,6 @@ const Orders = () => {
             exportOrders={exportOrders}
           />
         )}
-
-        {/* {renderOrderContent()} */}
       </div>
     </div>
   );

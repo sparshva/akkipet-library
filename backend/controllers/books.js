@@ -1,10 +1,10 @@
-import Book from "../models/book.js";
-import fs from "fs";
-import ExcelJS from "exceljs";
-import path from "path";
+const Book = require("../models/book.js");
+const fs = require("fs");
+const ExcelJS = require("exceljs");
+const path = require("path");
 
-export const getAllBooks = async (req, res) => {
-  console.log("Inside getAllBooks");
+const getAllBooks = async (req, res) => {
+  // console.log("Inside getAllBooks");
   try {
     const books = await Book.find();
     res.status(200).json(books);
@@ -13,8 +13,8 @@ export const getAllBooks = async (req, res) => {
   }
 };
 
-export const deleteSelectedBooks = async (req, res) => {
-  console.log("Inside deleteSelectedBooks");
+const deleteSelectedBooks = async (req, res) => {
+  // console.log("Inside deleteSelectedBooks");
 
   // Extract books array from request body
   const { books } = req.body;
@@ -26,7 +26,7 @@ export const deleteSelectedBooks = async (req, res) => {
       .json({ message: "Provide a non-empty array of books to delete." });
   }
 
-  console.log(books);
+  // console.log(books);
 
   // Extract _id values from each book object
   const bookIds = books.map((book) => book._id).filter((id) => id);
@@ -49,16 +49,12 @@ export const deleteSelectedBooks = async (req, res) => {
       const unavailableSerialNumbers = unavailableBooks.map(
         (unavailableBook) => {
           // Find the serial number (index) of the book from the original books array
-          return (
-            books.findIndex(
-              (book) => book._id.toString() === unavailableBook._id.toString()
-            ) + 1
-          );
+          return unavailableBook.serialNumber;
         }
       );
 
       return res.status(400).json({
-        message: `Books at serial numbers ${unavailableSerialNumbers.join(
+        message: `Books whose serial numbers are ${unavailableSerialNumbers.join(
           ", "
         )} cannot be deleted because they are currently ordered (status: NOT AVAILABLE).`,
         unavailableBooks: unavailableSerialNumbers,
@@ -89,15 +85,15 @@ const escapeRegExp = (string) => {
   return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // Escape special characters
 };
 
-export const getBooksByFilterRequest = async (req, res) => {
-  console.log("Inside getBooksByFilterRequest", req);
+const getBooksByFilterRequest = async (req, res) => {
+  // console.log("Inside getBooksByFilterRequest", req);
 
   const filters = req.body; // Get filters from the request body
   const page = parseInt(req.query.page) || 1; // Default to page 1 if not provided
   const limit = parseInt(req.query.limit) || 25; // Default to limit 20 if not provided
   const query = { $and: [] }; // Initialize an array to hold conditions
 
-  console.log("Filters:", filters);
+  // console.log("Filters:", filters);
 
   const hasFilters =
     filters.searchTerm ||
@@ -140,7 +136,7 @@ export const getBooksByFilterRequest = async (req, res) => {
       query.$and.push({ topic: { $in: filters.topics } }); // Match any of the topics
     }
 
-    console.log("Query with filters:", query);
+    // console.log("Query with filters:", query);
   }
 
   try {
@@ -169,7 +165,8 @@ export const getBooksByFilterRequest = async (req, res) => {
   }
 };
 
-export const getUniqueValues = async (req, res) => {
+const getUniqueValues = async (req, res) => {
+  // console.log("Inside getUniqueValues");
   try {
     const uniqueValues = await Book.aggregate([
       {
@@ -205,7 +202,7 @@ export const getUniqueValues = async (req, res) => {
   }
 };
 
-export const exportBooks = async (req, res) => {
+const exportBooks = async (req, res) => {
   try {
     const books = await Book.find(); // Fetch data from the database
 
@@ -256,7 +253,7 @@ export const exportBooks = async (req, res) => {
   }
 };
 
-export const uploadBooks = async (req, res) => {
+const uploadBooks = async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
@@ -339,4 +336,13 @@ export const uploadBooks = async (req, res) => {
     console.error("Error importing books:", error);
     res.status(500).json({ message: "Error importing books" });
   }
+};
+
+module.exports = {
+  getAllBooks,
+  uploadBooks,
+  exportBooks,
+  getBooksByFilterRequest,
+  getUniqueValues,
+  deleteSelectedBooks,
 };

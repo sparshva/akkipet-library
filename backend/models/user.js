@@ -1,6 +1,6 @@
-import mongoose from "mongoose";
-import validator from "validator"; // npm install validator
-import bcrypt from "bcryptjs";
+const mongoose = require("mongoose");
+const validator = require("validator"); // npm install validator
+const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema(
   {
@@ -76,4 +76,4 @@ userSchema.methods.isOtpValid = function (inputOtp) {
   return this.otp === inputOtp && this.otpExpiresAt > new Date();
 };
 
-export default mongoose.model("User", userSchema);
+module.exports = mongoose.model("User", userSchema);

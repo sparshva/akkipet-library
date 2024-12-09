@@ -13,7 +13,7 @@ const Users = () => {
   const navigate = useNavigate();
   useEffect(() => {
     const token = localStorage.getItem("token");
-    console.log("users token: " + token);
+    // console.log("users token: " + token);
     if (!token) navigate("/admin/login", { replace: true });
   }, [navigate]);
   const [admin, setAdmin] = useState({});
@@ -21,7 +21,7 @@ const Users = () => {
     const token = localStorage.getItem("token"); // Retrieve the token from storage
     if (token) {
       const decodedToken = jwtDecode(token);
-      console.log(decodedToken);
+      // console.log(decodedToken);
       setAdmin(decodedToken); // Display decoded payload (e.g., user information)
     }
   }, []);
@@ -40,9 +40,10 @@ const Users = () => {
 
       setAllUsers(response.data);
       //   setBooks(response.data);
-      console.log("Fetched users:", response.data);
+      // console.log("Fetched users:", response.data);
     } catch (error) {
       console.error("Error fetching users:", error);
+      toast.error("Failed to fetch users");
     }
   };
   useEffect(() => {
@@ -66,40 +67,6 @@ const Users = () => {
     }));
   };
 
-  //   const handleSubmit = async (e) => {
-  //     e.preventDefault();
-  //     if (formData.password !== formData.confirmPassword) {
-  //       alert("Passwords do not match!");
-  //       return;
-  //     }
-
-  //     console.log(formData);
-  //     try {
-  //       const response = await axios.post(
-  //         `http://localhost:3001/user/create`,
-  //         formData,
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${localStorage.getItem("token")}`, // retrieve and set the token
-  //           },
-  //         }
-  //       );
-
-  //       //   setAllUsers(response.data);
-  //       //   setBooks(response.data);
-  //       console.log("Fetched users:", response.data);
-  //     } catch (error) {
-  //       console.error("Error fetching users:", error);
-  //     }
-
-  //     setFormData({
-  //       name: "",
-  //       phoneNumber: "",
-  //       password: "",
-  //       confirmPassword: "",
-  //     });
-  //   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -114,7 +81,7 @@ const Users = () => {
       return;
     }
 
-    console.log("Submitting form data:", formData);
+    // console.log("Submitting form data:", formData);
 
     try {
       // Submit form with a promise toast
@@ -132,7 +99,7 @@ const Users = () => {
           pending: "Creating user...",
           success: {
             render({ data }) {
-              console.log("User created:", data);
+              // console.log("User created:", data);
               fetchallUsers();
               return "User created successfully!";
             },
@@ -159,27 +126,8 @@ const Users = () => {
     }
   };
 
-  //   const removeUser = async (id) => {
-  //     console.log(id);
-  //     try {
-  //       const response = await axios.delete(
-  //         `http://localhost:3001/user/delete/${id}`,
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${localStorage.getItem("token")}`, // retrieve and set the token
-  //           },
-  //         }
-  //       );
-  //       fetchallUsers();
-
-  //       console.log("Fetched users:", response.data);
-  //     } catch (error) {
-  //       console.error("Error fetching users:", error);
-  //     }
-  //   };
-
   const removeUser = async (id) => {
-    console.log("User ID to remove:", id);
+    // console.log("User ID to remove:", id);
 
     // Confirmation prompt
     if (!window.confirm("Are you sure you want to delete this user?")) {
@@ -201,7 +149,7 @@ const Users = () => {
           pending: "Deleting user...",
           success: {
             render({ data }) {
-              console.log("User deleted:", data);
+              // console.log("User deleted:", data);
               return "User deleted successfully!";
             },
           },
@@ -354,7 +302,7 @@ const Users = () => {
                     onChange={(e) => {
                       const numericValue = e.target.value.replace(/\D/g, ""); // Only allow digits
                       if (numericValue.length <= 10) {
-                        console.log(numericValue);
+                        // console.log(numericValue);
                         setFormData({
                           ...formData,
                           phoneNumber: numericValue,

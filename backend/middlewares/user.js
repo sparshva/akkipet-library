@@ -1,10 +1,10 @@
-import User from "../models/user.js"; // Assuming you have a User model
-import jwt from "jsonwebtoken"; // Make sure to import jwt
+const User = require("../models/user.js"); // Assuming you have a User model
+const jwt = require("jsonwebtoken"); // Make sure to import jwt
 
-export const authenticateAdmin = async (req, res, next) => {
+const authenticateAdmin = async (req, res, next) => {
   const token = req.headers["authorization"]?.split(" ")[1];
-  console.log("inside authenticateAdmin method");
-  console.log("Authentication", req.headers["authorization"]);
+  // console.log("inside authenticateAdmin method");
+  // console.log("Authentication", req.headers["authorization"]);
 
   if (!token) {
     return res.sendStatus(401); // Unauthorized - No token provided
@@ -12,7 +12,7 @@ export const authenticateAdmin = async (req, res, next) => {
 
   try {
     // Verify the token and decode it
-    console.log("Verifying the token", token);
+    // console.log("Verifying the token", token);
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Extract userId, name, and isAdmin from the token
@@ -51,3 +51,5 @@ export const authenticateAdmin = async (req, res, next) => {
     return res.sendStatus(403); // Forbidden - Token verification failed
   }
 };
+
+module.exports = { authenticateAdmin };

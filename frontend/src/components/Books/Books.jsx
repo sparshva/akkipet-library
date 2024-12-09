@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import AdminSideCollapsibleTable from "../CollapsibleTable/AdminSideCollapsibleTable";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -61,6 +61,7 @@ const Books = () => {
   const [loading, setLoading] = useState(true);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [totalBooks, setTotalBooks] = useState(0);
+  const abortControllerRef = useRef(null);
 
   //   const [selectedBooks, setSelectedBooks] = useState([]);
   const [selectedBooks, setSelectedBooks] = useState([]);
@@ -83,22 +84,39 @@ const Books = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
   const navigate = useNavigate();
+
   const fetchFilteredBooks = async (activeFilters, page) => {
     try {
-      console.log("filters", activeFilters);
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      // Create a new AbortController
+      const newController = new AbortController();
+      abortControllerRef.current = newController;
+
       const response = await axios.post(
         `${process.env.REACT_APP_BACKEND_BASE_URL}/books/filter?page=${page}`,
-        activeFilters // Send full filters object
+        activeFilters, // Send full filters object
+        {
+          signal: newController.signal, // Attach the signal for cancellation
+        }
       );
-      console.log(response);
+      // console.log(response);
       setBooks(response.data.results);
       setTotalBooks(response.data.totalCount);
-      toast.success("Books fetched successfully", {});
+      // toast.success("Books fetched successfully", {
+      //   //
+      // });
       setLoading(false);
       //   console.log("Fetched books:", response.data);
     } catch (error) {
-      console.error("Error fetching books:", error);
-      toast.error("Error fetching books", {});
+      if (error.name === "CanceledError") {
+        console.log("Request was canceled:", error.message);
+      } else {
+        console.error("Error fetching books:", error);
+        toast.error("Error fetching books");
+      }
     }
   };
   const fetchAllBooks = async () => {
@@ -107,7 +125,7 @@ const Books = () => {
       const totalPages = Math.ceil(response.data.length / 20);
       setTotalBooks(response.data.length);
       //   setBooks(response.data);
-      console.log("Fetched books:", response.data);
+      // console.log("Fetched books:", response.data);
     } catch (error) {
       console.error("Error fetching books:", error);
     }
@@ -117,17 +135,18 @@ const Books = () => {
       const response = await axios.get(
         `${process.env.REACT_APP_BACKEND_BASE_URL}/books/unique`
       ); // Adjust the API URL accordingly
-      const categoryData = response.data;
+      const categoryData = response.data || {}; // Ensure categoryData is an object even if response.data is undefined
+
       const formattedCategories = [
-        { id: 1, name: "Authors", values: categoryData.authors },
-        { id: 2, name: "Topics", values: categoryData.topics },
-        { id: 3, name: "Languages", values: categoryData.languages },
-        { id: 4, name: "Editors", values: categoryData.editors },
-        { id: 5, name: "Publishers", values: categoryData.publishers },
+        { id: 1, name: "Authors", values: categoryData.authors || [] }, // Default to empty array if authors is undefined
+        { id: 2, name: "Topics", values: categoryData.topics || [] }, // Default to empty array if topics is undefined
+        { id: 3, name: "Languages", values: categoryData.languages || [] }, // Default to empty array if languages is undefined
+        { id: 4, name: "Editors", values: categoryData.editors || [] }, // Default to empty array if editors is undefined
+        { id: 5, name: "Publishers", values: categoryData.publishers || [] }, // Default to empty array if publishers is undefined
       ];
       setCategories(formattedCategories);
-      console.log("Fetched categories:", response.data);
-      toast.success("Categories fetched successfully", {});
+      // console.log("Fetched categories:", response.data);
+      // toast.success("Categories fetched successfully", {});
     } catch (error) {
       console.error("Error fetching categories:", error);
       toast.error("Error fetching categories", {});
@@ -166,12 +185,12 @@ const Books = () => {
     event.preventDefault();
     setShowFilterModal(false);
     setLoading(true); // Show loading while fetching data
-    console.log("Apply filters");
+    // console.log("Apply filters");
     debouncedFetchBooks(filters, 1); // Call the debounced API with updated filters
   };
 
   const handleClearFilters = (event) => {
-    console.log("Clear filters");
+    // console.log("Clear filters");
 
     // Clear the filters and then fetch books with cleared filters
     setFilters((prevFilters) => {
@@ -193,7 +212,7 @@ const Books = () => {
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
     debouncedFetchBooks(filters, newPage + 1);
-    console.log("Change page", newPage);
+    // console.log("Change page", newPage);
   };
 
   const hasActiveFilters = () => {
@@ -202,7 +221,7 @@ const Books = () => {
     );
   };
 
-  console.log("Active filters", hasActiveFilters());
+  // console.log("Active filters", hasActiveFilters());
   const [file, setFile] = useState(null);
 
   const handleFileChange = (event) => {
@@ -243,6 +262,7 @@ const Books = () => {
               setFile(null);
               // navigate("/admin/manage/books");
               fetchFilteredBooks();
+              fetchCategories();
               return "Books imported successfully!";
             },
           },
@@ -283,17 +303,6 @@ const Books = () => {
               link.remove();
 
               return "Data exported successfully!";
-              // const blob = new Blob([data], {
-              //   type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-              // });
-              // const url = window.URL.createObjectURL(blob);
-              // const a = document.createElement("a");
-              // a.href = url;
-              // a.setAttribute("download", "books.xlsx"); // Use the provided filename
-              // document.body.appendChild(a);
-              // a.click();
-              // a.remove();
-              // return "Data exported successfully!";
             },
           },
           error: "Failed to export data.",
@@ -318,128 +327,99 @@ const Books = () => {
           }  `}
         > */}
         <div
-          className={`flex items-center bg-white  sticky pb-4 top-0 left-0 right-0 bottom-0  z-10 justify-between mb-4 `}
+          className={`flex items-center   flex-col md:flex-row  bg-[#fafafa]  sticky top-0 left-0 right-0 bottom-0 pb-4 z-10 mb-4 `}
         >
-          <div className="w-[100vh] relative h-full flex flex-col overflow-auto sm500:flex-row gap-2 items-center justify-between">
-            <div className=" bg-white flex gap-2 w-full  sm500:mb-0  sm500:w-11/12">
-              <div class="flex px-4 py-2 w-full rounded-md border-2  overflow-hidden  mx-auto font-[sans-serif]">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 192.904 192.904"
-                  width="16px"
-                  class="fill-gray-600 mr-3 rotate-90"
-                >
-                  <path d="m190.707 180.101-47.078-47.077c11.702-14.072 18.752-32.142 18.752-51.831C162.381 36.423 125.959 0 81.191 0 36.422 0 0 36.423 0 81.193c0 44.767 36.422 81.187 81.191 81.187 19.688 0 37.759-7.049 51.831-18.751l47.079 47.078a7.474 7.474 0 0 0 5.303 2.197 7.498 7.498 0 0 0 5.303-12.803zM15 81.193C15 44.694 44.693 15 81.191 15c36.497 0 66.189 29.694 66.189 66.193 0 36.496-29.692 66.187-66.189 66.187C44.693 147.38 15 117.689 15 81.193z"></path>
-                </svg>
-                <input
-                  type="text"
-                  placeholder="Search name..."
-                  class="w-full outline-none bg-transparent text-gray-600 text-[16px]"
-                  value={filters.searchTerm}
-                  onChange={handleSearchInputChange}
-                />
-              </div>
-              <div className="">
-                <button
-                  onClick={handleFileExport}
-                  className=" py-2 px-4 cursor-pointer bg-[#ad0000] text-white rounded-lg transition-colors focus:outline-none"
-                >
-                  Export
-                </button>
-              </div>
-            </div>
-            <div className=" flex items-center   justify-center gap-4 sm500:justify-end">
-              <div
-                className=" p-[0.45rem] flex justify-between items-center bg-gray-100 hover:bg-gray-200 rounded-md focus:outline-none   transition-colors cursor-pointer "
-                onClick={() => setShowFilterModal(true)}
+          {/* <div className="w-full border-2 border-black relative h-full flex flex-col overflow-auto sm500:flex-row gap-2 items-center justify-between"> */}
+          <div className=" flex gap-2 w-full md:mb-0  ">
+            <div class="flex px-4 py-2 w-full rounded-md border-2    font-[sans-serif]">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 192.904 192.904"
+                width="16px"
+                class="fill-gray-600 mr-3 rotate-90"
               >
-                {hasActiveFilters() ? (
-                  <FilterAltOffOutlinedIcon
-                    sx={{ color: "#ad0000", fontSize: "30px" }}
-                  />
-                ) : (
-                  <FilterAltOutlinedIcon
-                    sx={{ color: "#ad0000", fontSize: "30px" }}
-                  />
-                )}{" "}
-                <span className="text-[16px] px-[6px] text-[#ad0000]">
-                  {" "}
-                  Filter
-                </span>
-              </div>
-
-              {/* <div>
-                <input
-                  type="file"
-                  accept=".csv"
-                  text="csv"
-                  onChange={handleFileChange}
-                  className="flex whitespace-nowrap items-center py-[0.55rem] px-[0.45rem] bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                />
-
-                <button className="flex whitespace-nowrap items-center py-[0.55rem] px-[0.45rem] bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
-                  Import Books
-                </button>
-              </div> */}
-              {/* <div>
-                <label
-                  htmlFor="fileUpload"
-                  className="flex items-center py-2 px-4 bg-green-500 text-white rounded-lg cursor-pointer hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                >
-                  Import Books
-                </label>
-                <input
-                  id="fileUpload"
-                  type="file"
-                  accept=".csv"
-                  onChange={handleFileChange}
-                  className="hidden" // Hides the default file input
-                />
-                <button
-                  onClick={handleFileUpload}
-                  className="mt-2 py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                >
-                  Upload
-                </button>
-              </div> */}
-              <div className="max-w-[25vh]  overflow-auto">
-                <label
-                  htmlFor="fileUpload"
-                  className="flex w-[8rem] whitespace-nowrap items-center py-2 px-4 bg-green-500 text-white rounded-lg cursor-pointer hover:bg-green-600 transition-colors focus:outline-none "
-                >
-                  Import Books
-                </label>
-                <input
-                  id="fileUpload"
-                  type="file"
-                  accept=".xlsx, .xls"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-
-                {file && (
-                  <div className="mt-2 flex items-center">
-                    <p className="text-gray-700">
-                      {" "}
-                      {file.name.length > 10 ? `${file.name}...` : file.name}
-                    </p>
-                    <button
-                      onClick={() => setFile(null)}
-                      className="ml-4 py-1 px-3 cursor-pointer bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors focus:outline-none "
-                    >
-                      Remove
-                    </button>
-                    <button
-                      onClick={handleFileUpload}
-                      className="ml-2 py-1 px-3 cursor-pointer bg-[#ad0000] text-white rounded-lg transition-colors focus:outline-none "
-                    >
-                      Upload
-                    </button>
-                  </div>
-                )}
-              </div>
+                <path d="m190.707 180.101-47.078-47.077c11.702-14.072 18.752-32.142 18.752-51.831C162.381 36.423 125.959 0 81.191 0 36.422 0 0 36.423 0 81.193c0 44.767 36.422 81.187 81.191 81.187 19.688 0 37.759-7.049 51.831-18.751l47.079 47.078a7.474 7.474 0 0 0 5.303 2.197 7.498 7.498 0 0 0 5.303-12.803zM15 81.193C15 44.694 44.693 15 81.191 15c36.497 0 66.189 29.694 66.189 66.193 0 36.496-29.692 66.187-66.189 66.187C44.693 147.38 15 117.689 15 81.193z"></path>
+              </svg>
+              <input
+                type="text"
+                placeholder="Search name..."
+                class="w-full outline-none bg-transparent text-gray-600 text-[16px]"
+                value={filters.searchTerm}
+                onChange={handleSearchInputChange}
+              />
+            </div>
+            <div className="">
+              <button
+                onClick={handleFileExport}
+                className=" py-2 px-4 cursor-pointer bg-[#ad0000] text-white rounded-lg transition-colors focus:outline-none"
+              >
+                Export
+              </button>
             </div>
           </div>
+          <div className="overflow-auto w-full ml-0 md:ml-3 mt-3 md:mt-0 flex items-center   justify-center gap-4 md:justify-end">
+            <div
+              className=" p-[0.45rem] flex justify-between items-center bg-gray-100 hover:bg-gray-200 rounded-md focus:outline-none   transition-colors cursor-pointer "
+              onClick={() => setShowFilterModal(true)}
+            >
+              {hasActiveFilters() ? (
+                <FilterAltOffOutlinedIcon
+                  sx={{ color: "#ad0000", fontSize: "30px" }}
+                />
+              ) : (
+                <FilterAltOutlinedIcon
+                  sx={{ color: "#ad0000", fontSize: "30px" }}
+                />
+              )}{" "}
+              <span className="text-[16px] px-[6px] text-[#ad0000]">
+                {" "}
+                Filter
+              </span>
+            </div>
+
+            <div className="  overflow-auto">
+              {!file && (
+                <div>
+                  {" "}
+                  <label
+                    htmlFor="fileUpload"
+                    className="flex  whitespace-nowrap items-center py-2 px-4 bg-green-500 text-white rounded-lg cursor-pointer hover:bg-green-600 transition-colors focus:outline-none "
+                  >
+                    Import Books
+                  </label>
+                  <input
+                    id="fileUpload"
+                    type="file"
+                    accept=".xlsx, .xls"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                </div>
+              )}
+
+              {file && (
+                <div className="mt-2 flex items-center">
+                  <p className="text-gray-700">
+                    {" "}
+                    {file.name.length > 10 ? `${file.name}...` : file.name}
+                  </p>
+                  <button
+                    onClick={() => setFile(null)}
+                    className="ml-4 py-1 px-3 cursor-pointer bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors focus:outline-none "
+                  >
+                    Remove
+                  </button>
+                  <button
+                    onClick={handleFileUpload}
+                    className="ml-2 py-1 px-3 cursor-pointer bg-[#ad0000] text-white rounded-lg transition-colors focus:outline-none "
+                  >
+                    Upload
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+          {/* </div> */}
         </div>
         <div className="h-full  flex flex-col flex-grow rounded-md">
           <div className="w-full  mt-15 mb-4 rounded-md px-2  overflow-y-auto ">
@@ -465,41 +445,6 @@ const Books = () => {
             )}
           </div>
           <div className=" flex justify-end  items-center ">
-            {/* <Stack>
-              <Pagination
-                count={Math.ceil(totalBooks / 20)}
-                page={page}
-                siblingCount={0}
-                boundaryCount={1}
-                shape="rounded"
-                onChange={handlePageChange}
-                size="large"
-                sx={{
-                  "& .MuiPaginationItem-root": {
-                    fontSize:
-                      windowWidth > 400
-                        ? "1.2rem"
-                        : windowWidth > 360
-                        ? "1.1rem"
-                        : "0.9rem",
-                  },
-                  "& .MuiPaginationItem-icon": {
-                    fontSize:
-                      windowWidth > 400
-                        ? "1.3rem"
-                        : windowWidth > 360
-                        ? "1.1rem"
-                        : "1rem",
-                  },
-                }}
-                renderItem={(item) => (
-                  <PaginationItem
-                    slots={{ previous: ArrowBackIcon, next: ArrowForwardIcon }}
-                    {...item}
-                  />
-                )}
-              />
-            </Stack> */}
             <TablePagination
               rowsPerPageOptions={[]} // Removes dropdown options
               colSpan={3}
@@ -535,23 +480,6 @@ const Books = () => {
           </div>
         </div>
 
-        {/* <div
-          className={`fixed flex justify-end bottom-0 left-0 right-0 z-10 w-full ${
-            windowWidth < 450 ? "p-[0.75rem]" : "py-[0.75rem] px-[1.75rem]" // Example condition based on window size
-          }  bg-gray-100`}
-        >
-          <button
-            className={`px-4 py-2 bg-[#ad0000] text-white  rounded-md focus:outline-none focus:ring-blue-500 transition-colors ${
-              selectedBooks.length < 1 ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-            disabled={selectedBooks.length < 1}
-            onClick={(e) => handleAddToCart(e)}
-          >
-            {selectedBooks.length > 0
-              ? `Add to cart ( ${selectedBooks.length} )`
-              : "Add to cart"}
-          </button>
-        </div> */}
         {showFilterModal && (
           <div className="fixed inset-0 w-full p-4 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-4  rounded-lg shadow-xl  w-full">
@@ -564,7 +492,7 @@ const Books = () => {
                   debouncedFetchBooks={debouncedFetchBooks}
                 />
               </div>
-              <div className="mt-6 w-full flex justify-end ">
+              <div className="mt-6 w-full flex justify-end font-semibold">
                 <button
                   onClick={(e) => handleClearFilters(e)}
                   className="px-4 py-1 border border-[#ad0000]  rounded-lg  "

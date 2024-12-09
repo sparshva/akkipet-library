@@ -1,20 +1,20 @@
-import User from "../models/user.js"; // Assuming the user schema is in models/User.js
-import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
-import dotenv from "dotenv";
-import validator from "validator";
-import otpGenerator from "otp-generator";
-import Order from "../models/order.js"; // Import the Order model
+const User = require("../models/user.js"); // Assuming the user schema is in models/User.js
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const dotenv = require("dotenv");
+const validator = require("validator");
+const otpGenerator = require("otp-generator");
+const Order = require("../models/order.js"); // Import the Order model
 
 dotenv.config();
 
-export const loginAdmin = async (req, res) => {
+const loginAdmin = async (req, res) => {
   const { phoneNumber, password } = req.body;
 
   try {
     // Check if the user exists and is an admin
     const user = await User.findOne({ phoneNumber });
-    console.log(req.body);
+    // console.log(req.body);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -55,7 +55,7 @@ export const loginAdmin = async (req, res) => {
   }
 };
 
-export const createUser = async (req, res) => {
+const createUser = async (req, res) => {
   const { phoneNumber, name, password } = req.body;
 
   try {
@@ -91,7 +91,7 @@ export const createUser = async (req, res) => {
   }
 };
 
-export const getAllUsers = async (req, res) => {
+const getAllUsers = async (req, res) => {
   try {
     // Fetch all users from the database
     const users = await User.find();
@@ -106,7 +106,7 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-export const deleteUser = async (req, res) => {
+const deleteUser = async (req, res) => {
   const { userId } = req.params; // Extract the user ID from the request params
 
   try {
@@ -130,7 +130,7 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-export const sendOtp = async (req, res) => {
+const sendOtp = async (req, res) => {
   const { phoneNumber } = req.body;
 
   if (!phoneNumber) {
@@ -164,7 +164,7 @@ export const sendOtp = async (req, res) => {
     await user.save();
 
     // Mock sending the OTP to the user’s phone
-    console.log(`OTP sent to ${phoneNumber}: ${otp}`);
+    // console.log(`OTP sent to ${phoneNumber}: ${otp}`);
 
     res.status(200).json({ message: "OTP sent successfully" });
   } catch (error) {
@@ -176,7 +176,7 @@ export const sendOtp = async (req, res) => {
 };
 
 // Function to verify OTP
-export const verifyOtp = async (req, res) => {
+const verifyOtp = async (req, res) => {
   const { phoneNumber, otp } = req.body;
 
   if (!phoneNumber || !otp) {
@@ -214,4 +214,13 @@ export const verifyOtp = async (req, res) => {
       .status(500)
       .json({ message: "Error verifying OTP", error: error.message });
   }
+};
+
+module.exports = {
+  loginAdmin,
+  createUser,
+  sendOtp,
+  verifyOtp,
+  getAllUsers,
+  deleteUser,
 };
