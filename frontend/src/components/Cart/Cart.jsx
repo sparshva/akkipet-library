@@ -293,10 +293,8 @@ const Cart = () => {
                         onChange={(e) => {
                           const value = e.target.value;
                           // Allow only letters and spaces, remove everything else (e.g., numbers, punctuation)
-                          const filteredValue = value.replace(
-                            /[^A-Za-z\s\u0900-\u097F]/g,
-                            ""
-                          );
+                          const filteredValue = value.replace(/[0-9]/g, "");
+
                           console.log(filteredValue);
                           setOrderInfo({
                             ...orderinfo,
