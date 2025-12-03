@@ -60,6 +60,11 @@ function Row({ row, selectedBooks, setSelectedBooks, windowWidth }) {
             width: "100%", // Ensure the TableCell takes up full width
           }}
         >
+          {windowWidth <= 500 && (
+            <div style={{ width: "100%" }}>
+              <strong>S No:</strong> {row.serialNumber}
+            </div>
+          )}
           <div style={{ width: "100%" }}>
             <strong>Book Name in Hindi:</strong> {row.nameInHindi}
           </div>
@@ -78,10 +83,24 @@ function Row({ row, selectedBooks, setSelectedBooks, windowWidth }) {
               color: row.status != "AVAILABLE" ? "grey" : "inherit",
             }}
           >
+            {row.serialNumber}
+          </TableCell>
+        )}
+        {windowWidth > 700 && (
+          <TableCell
+            component="th"
+            scope="row"
+            align="left"
+            sx={{
+              padding: "0 20px",
+              fontSize: "16px",
+              color: row.status != "AVAILABLE" ? "grey" : "inherit",
+            }}
+          >
             {row.author}
           </TableCell>
         )}
-        {windowWidth > 800 && (
+        {windowWidth > 850 && (
           <TableCell
             component="th"
             scope="row"
@@ -95,7 +114,7 @@ function Row({ row, selectedBooks, setSelectedBooks, windowWidth }) {
             {row.editor}
           </TableCell>
         )}
-        {windowWidth > 950 && (
+        {windowWidth > 1000 && (
           <TableCell
             component="th"
             scope="row"
@@ -109,7 +128,7 @@ function Row({ row, selectedBooks, setSelectedBooks, windowWidth }) {
             {row.publisher}
           </TableCell>
         )}
-        {windowWidth > 1050 && (
+        {windowWidth > 1150 && (
           <TableCell
             component="th"
             scope="row"
@@ -123,7 +142,7 @@ function Row({ row, selectedBooks, setSelectedBooks, windowWidth }) {
             {row.topic}
           </TableCell>
         )}
-        {windowWidth > 1250 && (
+        {windowWidth > 1300 && (
           <TableCell
             component="th"
             scope="row"
@@ -354,10 +373,21 @@ const UserSideCollapsibleTable = ({
                   fontSize: "18px",
                 }}
               >
+                <strong>S. No.</strong>
+              </TableCell>
+            )}
+            {windowWidth > 700 && (
+              <TableCell
+                align="left"
+                sx={{
+                  padding: "10px 20px",
+                  fontSize: "18px",
+                }}
+              >
                 <strong>Author / लेखक</strong>
               </TableCell>
             )}
-            {windowWidth > 800 && (
+            {windowWidth > 850 && (
               <TableCell
                 align="left"
                 sx={{
@@ -368,7 +398,7 @@ const UserSideCollapsibleTable = ({
                 <strong> Editor / संपादक</strong>
               </TableCell>
             )}
-            {windowWidth > 950 && (
+            {windowWidth > 1000 && (
               <TableCell
                 align="left"
                 sx={{
@@ -379,7 +409,7 @@ const UserSideCollapsibleTable = ({
                 <strong>Publisher / प्रकाशक</strong>
               </TableCell>
             )}
-            {windowWidth > 1050 && (
+            {windowWidth > 1150 && (
               <TableCell
                 align="left"
                 sx={{
@@ -390,7 +420,7 @@ const UserSideCollapsibleTable = ({
                 <strong>Topic / विषय</strong>
               </TableCell>
             )}
-            {windowWidth > 1250 && (
+            {windowWidth > 1300 && (
               <TableCell
                 align="left"
                 sx={{

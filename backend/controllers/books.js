@@ -106,7 +106,7 @@ const getBooksByFilterRequest = async (req, res) => {
   // Build the query only if there are filters
   if (hasFilters) {
     if (filters.searchTerm !== "") {
-      const escapedSearchTerm = escapeRegExp(filters.searchTerm); // Escape special characters
+      const escapedSearchTerm = escapeRegExp(filters.searchTerm).trim(); // Escape special characters
       query.$and.push({
         $or: [
           { nameInHindi: { $regex: escapedSearchTerm, $options: "i" } }, // Case-insensitive search for name
@@ -146,7 +146,8 @@ const getBooksByFilterRequest = async (req, res) => {
     const results = await Book.find(finalQuery)
       .sort("nameInHindi") // Sorting by serialNumber
       .skip((page - 1) * limit) // Pagination logic
-      .limit(limit); // Limit the number of results per page
+      .limit(limit) // Limit the number of results per page
+      .lean();
 
     const totalCount = await Book.countDocuments(finalQuery); // Get total count of matching documents
 
@@ -269,20 +270,22 @@ const uploadBooks = async (req, res) => {
       if (rowNumber === 1) return; // Skip the header row
 
       // Extract book data from the row
-      const book = {
-        serialNumber: row.getCell(1).value,
-        nameInHindi: row.getCell(2).value,
-        nameInEnglish: row.getCell(3).value,
-        author: row.getCell(4).value,
-        editor: row.getCell(5).value,
-        publisher: row.getCell(6).value,
-        topic: row.getCell(7).value,
-
-        language: row.getCell(8).value,
-        status: row.getCell(9).value,
+      const rawBook = {
+        serialNumber: row.getCell(1).value?.toString().trim(),
+        nameInHindi: row.getCell(2).value?.toString().trim(),
+        nameInEnglish: row.getCell(3).value?.toString().trim(),
+        author: row.getCell(4).value?.toString().trim(),
+        editor: row.getCell(5).value?.toString().trim(),
+        publisher: row.getCell(6).value?.toString().trim(),
+        topic: row.getCell(7).value?.toString().trim(),
+        language: row.getCell(8).value?.toString().trim(),
       };
 
-      const requiredFields = [
+      if (!rawBook.serialNumber) return;
+
+      if (!rawBook.nameInHindi && !rawBook.nameInEnglish) return;
+
+      const allFields = [
         "serialNumber",
         "nameInHindi",
         "nameInEnglish",
@@ -294,13 +297,13 @@ const uploadBooks = async (req, res) => {
       ];
       const validBook = {};
 
-      for (const field of requiredFields) {
+      for (const field of allFields) {
         if (
-          book[field] !== null &&
-          book[field] !== undefined &&
-          book[field] !== ""
+          rawBook[field] !== null &&
+          rawBook[field] !== undefined &&
+          rawBook[field] !== ""
         ) {
-          validBook[field] = book[field];
+          validBook[field] = rawBook[field];
         }
       }
 
@@ -309,6 +312,12 @@ const uploadBooks = async (req, res) => {
         books.push(validBook);
       }
     });
+
+    if (!books.length) {
+      return res.status(400).json({
+        message: "No valid books found. Serial number and name is compulsory.",
+      });
+    }
 
     // Bulk insert or update books in MongoDB
     const bulkOps = books.map((book) => ({
@@ -325,13 +334,20 @@ const uploadBooks = async (req, res) => {
     }));
 
     // Only proceed if there are valid books to process
+    let addedCount = 0;
+    let updatedCount = 0;
     if (bulkOps.length > 0) {
-      await Book.bulkWrite(bulkOps);
+      const result = await Book.bulkWrite(bulkOps);
+      console.log(result);
+      addedCount = result.upsertedCount || 0;
+      updatedCount = result.modifiedCount || 0;
     }
 
     // fs.unlinkSync(req.file.path); // Delete file after processing
 
-    res.status(200).json({ message: "Books imported successfully" });
+    res.status(200).json({
+      message: `Added: ${addedCount}, Updated: ${updatedCount} successfully`,
+    });
   } catch (error) {
     console.error("Error importing books:", error);
     res.status(500).json({ message: "Error importing books" });

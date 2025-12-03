@@ -12,6 +12,7 @@ const img6 = process.env.PUBLIC_URL + "/images/img6.jpg";
 const img7 = process.env.PUBLIC_URL + "/images/img7.jpg";
 const img8 = process.env.PUBLIC_URL + "/images/img8.jpg";
 const img9 = process.env.PUBLIC_URL + "/images/img9.jpg";
+const img11 = process.env.PUBLIC_URL + "/images/img11.jpg";
 
 const Carousel = () => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -21,12 +22,6 @@ const Carousel = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
   const slides = [
-    // {
-    //   url: book,
-    // },
-    // {
-    //   url: img1,
-    // },
     {
       url: img10,
     },
@@ -50,6 +45,9 @@ const Carousel = () => {
     },
     {
       url: img9,
+    },
+    {
+      url: img11,
     },
   ];
 

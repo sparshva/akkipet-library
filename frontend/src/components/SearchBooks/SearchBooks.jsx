@@ -114,7 +114,7 @@ const SearchBooks = () => {
       //   console.log("Fetched books:", response.data);
     } catch (error) {
       if (error.name === "CanceledError") {
-        console.log("Request was canceled:", error.message);
+        return;
       } else {
         console.error("Error fetching books:", error);
         toast.error("Error fetching books");

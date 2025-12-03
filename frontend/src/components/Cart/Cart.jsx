@@ -158,7 +158,6 @@ const Cart = () => {
                               (b) => b.serialNumber !== book.serialNumber
                             )
                           );
-                          console.log("remove book");
                         }}
                       />
                     </div>
@@ -295,7 +294,6 @@ const Cart = () => {
                           // Allow only letters and spaces, remove everything else (e.g., numbers, punctuation)
                           const filteredValue = value.replace(/[0-9]/g, "");
 
-                          console.log(filteredValue);
                           setOrderInfo({
                             ...orderinfo,
                             contactName: filteredValue,

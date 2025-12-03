@@ -7,6 +7,7 @@ const {
   getOrdersGroupedByStatus,
   exportOrders,
   getTotalCountOfOrders,
+  getPaginatedOrders,
 } = require("../controllers/orders.js");
 const { authenticateAdmin } = require("../middlewares/user.js"); // Import the adminMiddleware
 
@@ -25,6 +26,8 @@ router.get(
   authenticateAdmin,
   getOrdersGroupedByStatus
 );
+
+router.get("/all-orders", authenticateAdmin, getPaginatedOrders);
 
 router.get("/total-orders", getTotalCountOfOrders);
 

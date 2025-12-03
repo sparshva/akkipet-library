@@ -3,37 +3,122 @@ import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import axios from "axios";
 import { toast } from "../Toast/Toast";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 const OrdersGiven = ({
-  allOrders,
-  setAllOrders,
+  // allOrders,
+  // setAllOrders,
   fetchAllOrders,
   exportOrders,
 }) => {
   const [activeAccordion, setActiveAccordion] = useState(null);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredOrders, setFilteredOrders] = useState([]);
+
+  const [loading, setLoading] = useState(true);
+
+  const [orders, setOrders] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const limit = 20;
+
+  // const fetchOrders = async (pageNumber = 1) => {
+  //   try {
+  //     const res = await axios.get(
+  //       `${process.env.REACT_APP_BACKEND_BASE_URL}/order/all-orders`,
+  //       {
+  //         params: {
+  //           status: ["PENDING", "ACCEPTED"], // e.g. ["PENDING"]
+  //           page: pageNumber,
+  //           limit,
+  //           search: searchQuery,
+  //         },
+  //         headers: {
+  //           Authorization: `Bearer ${localStorage.getItem("token")}`,
+  //         },
+  //       }
+  //     );
+
+  //     const newOrders = res.data.data || [];
+
+  //     setHasMore(res.data?.pagination?.hasMore);
+
+  //     // ✅ Append new data
+  //     setOrders((prev) => [...prev, ...newOrders]);
+  //   } catch (error) {
+  //     console.error("Error fetching orders:", error);
+  //     setHasMore(false);
+  //   }
+  // };
+
+  // Fetch first page on mount or when status changes
+  // useEffect(() => {
+  //   setOrders([]);
+  //   setPage(1);
+  //   setHasMore(true);
+  //   fetchOrders(1);
+  // }, [searchQuery]);
+
+  const fetchOrders = async (pageNumber = 1) => {
+    try {
+      const res = await axios.get(
+        `${process.env.REACT_APP_BACKEND_BASE_URL}/order/all-orders`,
+        {
+          params: {
+            status: ["ACCEPTED"],
+            page: pageNumber,
+            limit,
+            search: searchQuery,
+          },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      const newOrders = res.data?.data || [];
+      setLoading(false);
+      setHasMore(res.data?.pagination?.hasMore);
+
+      if (pageNumber === 1) {
+        setOrders(newOrders);
+      } else {
+        setOrders((prev) => [...prev, ...newOrders]);
+      }
+    } catch (error) {
+      if (error.name === "CanceledError") {
+        return;
+      }
+      setHasMore(false);
+      toast.error("Error fetching orders");
+      if (error.response && error.response.status === 401) {
+        // Clear token
+        localStorage.removeItem("token");
+
+        // Redirect to login
+        window.alert("Login error or expired. Please login again");
+        window.location.href = "/admin/login";
+      }
+    }
+  };
 
   useEffect(() => {
-    setFilteredOrders(allOrders); // Set the initial orders when allOrders is available
-  }, [allOrders]);
+    const delay = setTimeout(() => {
+      // new search: reset everything
+      setOrders([]);
+      setPage(1);
+      setHasMore(true);
+      fetchOrders(1); // mark as search
+    }, 500); // debounce 300ms
 
-  useEffect(() => {
-    const filtered = allOrders.filter(
-      (order) =>
-        order.bookName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        order.bookSerialNumber
-          ?.toLowerCase()
-          .includes(searchQuery.toLowerCase()) ||
-        order.contactName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        order.contactNumber
-          ?.toLowerCase()
-          .includes(searchQuery.toLowerCase()) ||
-        order.sahebjiName?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setFilteredOrders(filtered);
-  }, [searchQuery, allOrders]); // Add allOrders to dependencies here
+    return () => clearTimeout(delay);
+  }, [searchQuery]);
+
+  const fetchMoreData = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchOrders(nextPage);
+  };
 
   const handleAccordionClick = (index) => {
     setActiveAccordion(activeAccordion === index ? null : index);
@@ -58,65 +143,35 @@ const OrdersGiven = ({
             },
           }
         ),
+
         {
           pending: "Marking order as returned...",
-          success: "Order marked as returned!",
-          error: "Failed to mark order as returned.",
+
+          // SUCCESS MESSAGE FROM BACKEND
+          success: {
+            render({ data }) {
+              return data?.data?.message || "Order returned successfully!";
+            },
+          },
+
+          // ERROR MESSAGE FROM BACKEND
+          error: {
+            render({ data }) {
+              return data?.response?.data?.message || "Error returning order.";
+            },
+          },
         }
       );
 
       // Fetch updated orders after marking as returned
-      fetchAllOrders();
+      setOrders([]);
+      setPage(1);
+      setHasMore(true);
+      fetchOrders(1);
       // console.log(`Order ${orderId} marked as returned`);
     } catch (error) {
       // console.error("Error marking order as returned:", error);
       setError(`Failed to mark order ${orderId} as returned`);
-    }
-  };
-
-  const handleFileExport = async () => {
-    const confirmAction = window.confirm(
-      "Are you sure you want to export the data?"
-    );
-    if (!confirmAction) return; // Exit if user selects "Cancel"
-
-    try {
-      await toast.promise(
-        axios.post(
-          `${process.env.REACT_APP_BACKEND_BASE_URL}/order/export`,
-          {
-            statuses: ["ACCEPTED"],
-
-            searchQuery,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        ),
-        {
-          pending: "Exporting data...",
-          success: {
-            render({ data }) {
-              // Create a Blob from the response data and trigger download
-              const blob = new Blob([data.data], { type: "text/csv" });
-              const url = window.URL.createObjectURL(blob);
-              const a = document.createElement("a");
-              a.href = url;
-              a.setAttribute("download", "issued-orders.csv"); // Filename for download
-              document.body.appendChild(a);
-              a.click();
-              a.remove();
-              return "Data exported successfully!";
-            },
-          },
-          error: "Error exporting data",
-        }
-      );
-    } catch (error) {
-      console.error("Error exporting data:", error);
-      toast.error("Error exporting data");
     }
   };
 
@@ -167,189 +222,216 @@ const OrdersGiven = ({
           </div>
         </div>
         <div className="w-full flex flex-col">
-          {filteredOrders.length === 0 ? (
-            <div className="text-center py-8 bg-gray-50 rounded-lg">
-              <p className="text-gray-600">No matching orders found</p>
-            </div>
+          {orders?.length === 0 ? (
+            loading ? (
+              <div className="text-center py-8 bg-gray-50  rounded-lg">
+                <b className="text-gray-600">Loading...</b>
+              </div>
+            ) : (
+              <div className="text-center py-8 bg-gray-50  rounded-lg">
+                <b className="text-gray-600">No orders</b>
+              </div>
+            )
           ) : (
             <div className="">
-              {filteredOrders.map((order, index) => (
-                <div
-                  key={order.id}
-                  className="bg-white rounded-lg overflow-auto shadow-[0_1px_5px_1px_rgba(0,0,0,0.3)]  hover:shadow-lg mb-4 duration-300"
-                >
-                  <button
-                    onClick={() => handleAccordionClick(index)}
-                    className="w-full text-left p-4 focus:outline-none  rounded-lg"
-                    aria-expanded={activeAccordion === index}
-                    aria-controls={`content-${order.id}`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <h3 className="text-[18px] font-semibold text-gray-800">
-                          {order.bookName}
-                        </h3>
-                        <p className="text-[16px] text-gray-600">
-                          {/* Order ID: {order.id} | Book ID: {order.bookId} */}
-                          Serial Number: {order.bookSerialNumber}
-                        </p>
-                        <p className="text-[16px] text-gray-600">
-                          {/* Order ID: {order.id} | Book ID: {order.bookId} */}
-                          Status: {order.orderStatus}
-                        </p>
-                      </div>
-                      {activeAccordion === index ? (
-                        <ArrowUpwardIcon className="text-gray-600 text-xl" />
-                      ) : (
-                        <ArrowDownwardIcon className="text-gray-600 text-xl" />
-                      )}
-                    </div>
-                  </button>
-
+              <InfiniteScroll
+                dataLength={orders.length}
+                next={fetchMoreData}
+                hasMore={hasMore}
+                loader={
+                  <h4 className="text-center mt-2 text-gray-600">Loading...</h4>
+                }
+                endMessage={
+                  <p className="text-center mt-2 text-gray-600">
+                    <b>No more orders</b>
+                  </p>
+                }
+              >
+                {orders?.map((order, index) => (
                   <div
-                    id={`content-${order.id}`}
-                    className={`px-4 overflow-auto transition-all duration-300 ${
-                      activeAccordion === index ? "max-h-96 pb-4" : "max-h-0"
-                    }`}
-                    role="region"
-                    aria-labelledby={`heading-${order.id}`}
+                    key={order.id}
+                    className="bg-white rounded-lg overflow-auto shadow-[0_1px_5px_1px_rgba(0,0,0,0.3)]  hover:shadow-lg mb-4 duration-300"
                   >
-                    <div className="space-y-2">
-                      <p className="text-gray-700">
-                        <span className="font-medium">Sahebji Name:</span>{" "}
-                        {order.sahebjiName}
-                      </p>
-                      <p className="text-gray-700">
-                        <span className="font-medium">Samuday:</span>{" "}
-                        {order.samuday}
-                      </p>
-                      <p className="text-gray-700">
-                        <span className="font-medium">Contact Name:</span>{" "}
-                        {order.contactName}
-                      </p>
+                    <button
+                      onClick={() => handleAccordionClick(index)}
+                      className="w-full text-left p-4 focus:outline-none  rounded-lg"
+                      aria-expanded={activeAccordion === index}
+                      aria-controls={`content-${order.id}`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <h3 className="text-[18px] font-semibold text-gray-800">
+                            {order.bookName}
+                          </h3>
+                          <p className="text-[16px] text-gray-600">
+                            {/* Order ID: {order.id} | Book ID: {order.bookId} */}
+                            Serial Number: {order.bookSerialNumber}
+                          </p>
+                          <p className="text-[16px] text-gray-600">
+                            {/* Order ID: {order.id} | Book ID: {order.bookId} */}
+                            Status: {order.orderStatus}
+                          </p>
+                        </div>
+                        {activeAccordion === index ? (
+                          <ArrowUpwardIcon className="text-gray-600 text-xl" />
+                        ) : (
+                          <ArrowDownwardIcon className="text-gray-600 text-xl" />
+                        )}
+                      </div>
+                    </button>
 
-                      <p className="text-gray-700">
-                        <span className="font-medium">Contact Number:</span>{" "}
-                        {order.contactNumber}
-                      </p>
+                    <div
+                      id={`content-${order.id}`}
+                      className={`px-4 overflow-auto transition-all duration-300 ${
+                        activeAccordion === index ? "max-h-96 pb-4" : "max-h-0"
+                      }`}
+                      role="region"
+                      aria-labelledby={`heading-${order.id}`}
+                    >
+                      <div className="space-y-2">
+                        <p className="text-gray-700">
+                          <span className="font-medium">Sahebji Name:</span>{" "}
+                          {order.sahebjiName}
+                        </p>
+                        <p className="text-gray-700">
+                          <span className="font-medium">Samuday:</span>{" "}
+                          {order.samuday}
+                        </p>
+                        <p className="text-gray-700">
+                          <span className="font-medium">Contact Name:</span>{" "}
+                          {order.contactName}
+                        </p>
 
-                      <p className="text-gray-700">
-                        <span className="font-medium">Address:</span>{" "}
-                        {order.address}
-                      </p>
-                      <p className="text-gray-700">
-                        <span className="font-medium">City:</span> {order.city}
-                      </p>
-                      <p className="text-gray-700">
-                        <span className="font-medium">Pin Code:</span>{" "}
-                        {order.pinCode}
-                      </p>
-                      <p className="text-gray-700">
-                        <span className="font-medium">Requested for days:</span>{" "}
-                        {order.days}
-                      </p>
-                      <p className="text-gray-700">
-                        <span className="font-medium">Additional Info:</span>{" "}
-                        {order.extraInfo}{" "}
-                      </p>
-                      <p className="text-gray-700">
-                        <span className="font-medium">Received Date:</span>{" "}
-                        {(() => {
-                          const date = new Date(order.createdAt);
-                          const day = String(date.getDate()).padStart(2, "0"); // Ensure two digits
-                          const month = String(date.getMonth() + 1).padStart(
-                            2,
-                            "0"
-                          ); // Months are 0-based
-                          const year = date.getFullYear();
-                          return `${day}/${month}/${year}`; // Format as DD/MM/YYYY
-                        })()}{" "}
-                      </p>
-                      {order.orderStatus === "ACCEPTED" && (
-                        <>
-                          <p className="text-gray-700">
-                            <span className="font-medium">Accepted By:</span>{" "}
-                            {order.acceptedOrRejectedBy}
-                          </p>
-                          <p className="text-gray-700">
-                            <span className="font-medium">Accepted At:</span>{" "}
-                            {(() => {
-                              const date = new Date(order.acceptedOrRejectedAt);
-                              const day = String(date.getDate()).padStart(
-                                2,
-                                "0"
-                              );
-                              const month = String(
-                                date.getMonth() + 1
-                              ).padStart(2, "0");
-                              const year = date.getFullYear();
-                              return `${day}/${month}/${year}`;
-                            })()}
-                          </p>
-                        </>
-                      )}
+                        <p className="text-gray-700">
+                          <span className="font-medium">Contact Number:</span>{" "}
+                          {order.contactNumber}
+                        </p>
 
-                      {order.orderStatus === "REJECTED" && (
-                        <>
-                          <p className="text-gray-700">
-                            <span className="font-medium">Rejected By:</span>{" "}
-                            {order.acceptedOrRejectedBy}
-                          </p>
-                          <p className="text-gray-700">
-                            <span className="font-medium">Rejected At:</span>{" "}
-                            {(() => {
-                              const date = new Date(order.acceptedOrRejectedAt);
-                              const day = String(date.getDate()).padStart(
-                                2,
-                                "0"
-                              );
-                              const month = String(
-                                date.getMonth() + 1
-                              ).padStart(2, "0");
-                              const year = date.getFullYear();
-                              return `${day}/${month}/${year}`;
-                            })()}
-                          </p>
-                        </>
-                      )}
+                        <p className="text-gray-700">
+                          <span className="font-medium">Address:</span>{" "}
+                          {order.address}
+                        </p>
+                        <p className="text-gray-700">
+                          <span className="font-medium">City:</span>{" "}
+                          {order.city}
+                        </p>
+                        <p className="text-gray-700">
+                          <span className="font-medium">Pin Code:</span>{" "}
+                          {order.pinCode}
+                        </p>
+                        <p className="text-gray-700">
+                          <span className="font-medium">
+                            Requested for days:
+                          </span>{" "}
+                          {order.days}
+                        </p>
+                        <p className="text-gray-700">
+                          <span className="font-medium">Additional Info:</span>{" "}
+                          {order.extraInfo}{" "}
+                        </p>
+                        <p className="text-gray-700">
+                          <span className="font-medium">Received Date:</span>{" "}
+                          {(() => {
+                            const date = new Date(order.createdAt);
+                            const day = String(date.getDate()).padStart(2, "0"); // Ensure two digits
+                            const month = String(date.getMonth() + 1).padStart(
+                              2,
+                              "0"
+                            ); // Months are 0-based
+                            const year = date.getFullYear();
+                            return `${day}/${month}/${year}`; // Format as DD/MM/YYYY
+                          })()}{" "}
+                        </p>
+                        {order.orderStatus === "ACCEPTED" && (
+                          <>
+                            <p className="text-gray-700">
+                              <span className="font-medium">Accepted By:</span>{" "}
+                              {order.acceptedOrRejectedBy}
+                            </p>
+                            <p className="text-gray-700">
+                              <span className="font-medium">Accepted At:</span>{" "}
+                              {(() => {
+                                const date = new Date(
+                                  order.acceptedOrRejectedAt
+                                );
+                                const day = String(date.getDate()).padStart(
+                                  2,
+                                  "0"
+                                );
+                                const month = String(
+                                  date.getMonth() + 1
+                                ).padStart(2, "0");
+                                const year = date.getFullYear();
+                                return `${day}/${month}/${year}`;
+                              })()}
+                            </p>
+                          </>
+                        )}
 
-                      {order.orderStatus === "RETURNED" && (
-                        <>
-                          <p className="text-gray-700">
-                            <span className="font-medium">Returned By:</span>{" "}
-                            {order.returnAcceptedBy}
-                          </p>
-                          <p className="text-gray-700">
-                            <span className="font-medium">Return Date:</span>{" "}
-                            {(() => {
-                              const date = new Date(order.returnDate);
-                              const day = String(date.getDate()).padStart(
-                                2,
-                                "0"
-                              );
-                              const month = String(
-                                date.getMonth() + 1
-                              ).padStart(2, "0");
-                              const year = date.getFullYear();
-                              return `${day}/${month}/${year}`;
-                            })()}
-                          </p>
-                        </>
-                      )}
+                        {order.orderStatus === "REJECTED" && (
+                          <>
+                            <p className="text-gray-700">
+                              <span className="font-medium">Rejected By:</span>{" "}
+                              {order.acceptedOrRejectedBy}
+                            </p>
+                            <p className="text-gray-700">
+                              <span className="font-medium">Rejected At:</span>{" "}
+                              {(() => {
+                                const date = new Date(
+                                  order.acceptedOrRejectedAt
+                                );
+                                const day = String(date.getDate()).padStart(
+                                  2,
+                                  "0"
+                                );
+                                const month = String(
+                                  date.getMonth() + 1
+                                ).padStart(2, "0");
+                                const year = date.getFullYear();
+                                return `${day}/${month}/${year}`;
+                              })()}
+                            </p>
+                          </>
+                        )}
 
-                      <div className="flex w-full gap-4 mt-4 pt-2 border-t border-gray-100">
-                        <button
-                          onClick={() => handleReturn(order._id)}
-                          className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-md transition-colors duration-300 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                          aria-label="Accept order"
-                        >
-                          Confirm Return
-                        </button>
+                        {order.orderStatus === "RETURNED" && (
+                          <>
+                            <p className="text-gray-700">
+                              <span className="font-medium">Returned By:</span>{" "}
+                              {order.returnAcceptedBy}
+                            </p>
+                            <p className="text-gray-700">
+                              <span className="font-medium">Return Date:</span>{" "}
+                              {(() => {
+                                const date = new Date(order.returnDate);
+                                const day = String(date.getDate()).padStart(
+                                  2,
+                                  "0"
+                                );
+                                const month = String(
+                                  date.getMonth() + 1
+                                ).padStart(2, "0");
+                                const year = date.getFullYear();
+                                return `${day}/${month}/${year}`;
+                              })()}
+                            </p>
+                          </>
+                        )}
+
+                        <div className="flex w-full gap-4 mt-4 pt-2 border-t border-gray-100">
+                          <button
+                            onClick={() => handleReturn(order._id)}
+                            className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-md transition-colors duration-300 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                            aria-label="Accept order"
+                          >
+                            Confirm Return
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </InfiniteScroll>
             </div>
           )}
         </div>
@@ -359,3 +441,89 @@ const OrdersGiven = ({
 };
 
 export default OrdersGiven;
+
+// import React, { useState, useEffect } from "react";
+// import InfiniteScroll from "react-infinite-scroll-component";
+// import axios from "axios";
+
+// const OrdersInfinite = ({ statusArray }) => {
+//   const [orders, setOrders] = useState([]);
+//   const [page, setPage] = useState(1);
+//   const [hasMore, setHasMore] = useState(true);
+//   const limit = 10;
+
+//   const fetchOrders = async (pageNumber = 1) => {
+//     try {
+//       const res = await axios.get(
+//         `${process.env.REACT_APP_BACKEND_BASE_URL}/order/all-orders`,
+//         {
+//           params: {
+//             status: ["PENDING", "ACCEPTED"], // e.g. ["PENDING"]
+//             page: pageNumber,
+//             limit,
+//           },
+//           headers: {
+//             Authorization: `Bearer ${localStorage.getItem("token")}`,
+//           },
+//         }
+//       );
+
+//       const newOrders = res.data.data || [];
+
+//       setHasMore(res.data?.pagination?.hasMore);
+
+//       // ✅ Append new data
+//       setOrders((prev) => [...prev, ...newOrders]);
+//     } catch (error) {
+//       console.error("Error fetching orders:", error);
+//       setHasMore(false);
+//     }
+//   };
+
+//   // Fetch first page on mount or when status changes
+//   useEffect(() => {
+//     setOrders([]);
+//     setPage(1);
+//     setHasMore(true);
+//     fetchOrders(1);
+//   }, [statusArray]);
+
+//   const fetchMoreData = () => {
+//     const nextPage = page + 1;
+//     setPage(nextPage);
+//     fetchOrders(nextPage);
+//   };
+
+//   return (
+//     <div className="p-4">
+//       <h2 className="font-bold text-lg mb-4">Orders</h2>
+
+//       <InfiniteScroll
+//         dataLength={orders.length}
+//         next={fetchMoreData}
+//         hasMore={hasMore}
+//         loader={<h4 className="text-center mt-2 text-gray-500">Loading...</h4>}
+//         endMessage={
+//           <p className="text-center mt-2 text-gray-500">
+//             <b>No more orders</b>
+//           </p>
+//         }
+//       >
+//         {orders.map((order, index) => (
+//           <div
+//             key={order._id || index}
+//             className="p-3 mb-2 border rounded-md bg-white shadow-sm"
+//           >
+//             <p className="font-medium">{order.bookName}</p>
+//             <p className="text-gray-500 text-sm">
+//               Serial: {order.bookSerialNumber}
+//             </p>
+//             <p className="text-gray-600 text-sm">Status: {order.status}</p>
+//           </div>
+//         ))}
+//       </InfiniteScroll>
+//     </div>
+//   );
+// };
+
+// export default OrdersInfinite;

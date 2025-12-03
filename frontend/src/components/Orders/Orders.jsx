@@ -16,96 +16,11 @@ const Orders = () => {
   const navigate = useNavigate();
   useEffect(() => {
     const token = localStorage.getItem("token");
-    // console.log("Orders token: " + token);
     if (!token) navigate("/admin/login", { replace: true });
   }, [navigate]);
-  const [allOrders, setAllOrders] = useState([]);
 
-  const fetchAllOrders = async () => {
-    try {
-      await toast.promise(
-        axios.get(
-          `${process.env.REACT_APP_BACKEND_BASE_URL}/order/orders/grouped-by-status`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`, // retrieve and set the token
-            },
-          }
-        ),
-        {
-          pending: "Fetching orders...",
-          success: {
-            render({ data }) {
-              setAllOrders(data.data); // Set the data from response
-              console.log("Fetched orders:", data.data);
-              return "Orders fetched successfully!";
-            },
-          },
-          error: "Error fetching orders",
-        }
-      );
-    } catch (error) {
-      console.error("Error fetching orders:", error);
-      toast.error("Error fetching orders");
-    }
-  };
-
-  useEffect(() => {
-    fetchAllOrders();
-  }, []);
   const [activeTab, setActiveTab] = useState("pending");
   const [error, setError] = useState(false);
-
-  const dummyOrders = {
-    pending: [
-      {
-        id: "ORD001",
-        customerName: "John Doe",
-        date: "2024-01-15",
-        status: "Awaiting Confirmation",
-        total: "$299.99",
-      },
-      {
-        id: "ORD002",
-        customerName: "Jane Smith",
-        date: "2024-01-16",
-        status: "Payment Pending",
-        total: "$149.50",
-      },
-    ],
-    given: [
-      {
-        id: "ORD003",
-        customerName: "Mike Johnson",
-        date: "2024-01-14",
-        status: "In Transit",
-        total: "$599.99",
-      },
-      {
-        id: "ORD004",
-        customerName: "Sarah Williams",
-        date: "2024-01-13",
-        status: "Out for Delivery",
-        total: "$899.00",
-      },
-    ],
-    processed: [
-      {
-        id: "ORD005",
-        customerName: "Robert Brown",
-        date: "2024-01-12",
-        status: "Delivered",
-        total: "$199.99",
-      },
-      {
-        id: "ORD006",
-        customerName: "Emily Davis",
-        date: "2024-01-11",
-        status: "Completed",
-        total: "$449.99",
-      },
-    ],
-  };
 
   const tabs = [
     {
@@ -201,31 +116,12 @@ const Orders = () => {
         id={`${activeTab}-content`}
         aria-labelledby={activeTab}
       >
-        {allOrders && activeTab === "pending" ? (
-          <OrdersPending
-            allOrders={allOrders.PENDING || []}
-            setAllOrders={setAllOrders}
-            fetchAllOrders={fetchAllOrders}
-            exportOrders={exportOrders}
-          />
+        {activeTab === "pending" ? (
+          <OrdersPending exportOrders={exportOrders} />
         ) : activeTab === "issued" ? (
-          <OrdersGiven
-            allOrders={allOrders.ACCEPTED || []}
-            setAllOrders={setAllOrders}
-            fetchAllOrders={fetchAllOrders}
-            exportOrders={exportOrders}
-          />
+          <OrdersGiven exportOrders={exportOrders} />
         ) : (
-          <OrdersHistory
-            allOrders={[
-              ...(allOrders.RETURNED || []),
-              ...(allOrders.REJECTED || []),
-              ...(allOrders.ACCEPTED || []),
-            ]}
-            setAllOrders={setAllOrders}
-            fetchAllOrders={fetchAllOrders}
-            exportOrders={exportOrders}
-          />
+          <OrdersHistory exportOrders={exportOrders} />
         )}
       </div>
     </div>

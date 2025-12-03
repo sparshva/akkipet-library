@@ -42,8 +42,14 @@ const Users = () => {
       //   setBooks(response.data);
       // console.log("Fetched users:", response.data);
     } catch (error) {
-      console.error("Error fetching users:", error);
       toast.error("Failed to fetch users");
+      if (error.response && error.response.status === 401) {
+        // Clear token
+        localStorage.removeItem("token");
+        window.alert("Login error or expired. Please login again");
+        // Redirect to login
+        window.location.href = "/admin/login";
+      }
     }
   };
   useEffect(() => {
@@ -123,6 +129,14 @@ const Users = () => {
     } catch (error) {
       console.error("An error occurred:", error);
       toast.error("Error creating user");
+      if (error.response && error.response.status === 401) {
+        // Clear token
+        localStorage.removeItem("token");
+
+        // Redirect to login
+        window.alert("Login error or expired. Please login again");
+        window.location.href = "/admin/login";
+      }
     }
   };
 
@@ -170,6 +184,14 @@ const Users = () => {
     } catch (error) {
       console.error("An error occurred while deleting the user:", error);
       toast.error("Error deleting user");
+      if (error.response && error.response.status === 401) {
+        // Clear token
+        localStorage.removeItem("token");
+
+        // Redirect to login
+        window.alert("Login error or expired. Please login again");
+        window.location.href = "/admin/login";
+      }
     }
   };
 

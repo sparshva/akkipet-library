@@ -66,10 +66,10 @@ const createOrders = async (req, res) => {
     // Create a new order for each available book
     const createdOrders = [];
     for (const book of books) {
-      const { serialNumber, nameInHindi } = book;
+      const { serialNumber, nameInHindi, nameInEnglish } = book;
 
       // Ensure each book has the necessary details
-      if (!serialNumber || !nameInHindi) {
+      if (!serialNumber || !(nameInHindi || nameInEnglish)) {
         return res.status(400).json({
           message: "Each book must have a serial number and a name.",
         });
@@ -108,7 +108,7 @@ const createOrders = async (req, res) => {
         days,
         orderStatus: "PENDING",
         bookSerialNumber: serialNumber,
-        bookName: nameInHindi,
+        bookName: nameInHindi || nameInEnglish,
         extraInfo,
       });
 
@@ -284,12 +284,68 @@ const getOrdersGroupedByStatus = async (req, res) => {
   }
 };
 
+const getPaginatedOrders = async (req, res) => {
+  try {
+    let { status = [], page = 1, limit = 20, search = "" } = req.query;
+
+    // Convert query params
+    if (typeof status === "string") status = [status]; // support both string or array
+    page = parseInt(page);
+    limit = parseInt(limit);
+
+    // Build filter
+    const filter = {};
+
+    if (Array.isArray(status) && status.length > 0) {
+      filter.orderStatus = { $in: status.map((s) => s.toUpperCase()) };
+    }
+
+    if (search.trim()) {
+      const regex = new RegExp(search.trim(), "i");
+      filter.$or = [
+        { bookName: regex },
+        { bookSerialNumber: regex },
+        { contactName: regex },
+        { contactNumber: regex },
+        { sahebjiName: regex },
+      ];
+    }
+
+    // Fetch orders paginated
+    const orders = await Order.find(filter)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean();
+
+    const total = await Order.countDocuments(filter);
+
+    res.status(200).json({
+      success: true,
+      data: orders,
+      pagination: {
+        total,
+        page,
+        limit,
+        hasMore: total > page * limit,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching paginated orders:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching paginated orders",
+    });
+  }
+};
+
 const exportOrders = async (req, res) => {
   const { statuses, searchQuery } = req.body;
 
   try {
     // console.log("exportOrders", statuses);
     // console.log("searchQuery", searchQuery);
+    searchQuery = searchQuery.trim();
 
     // Fetch all orders based on the provided statuses
     const orders = await Order.find({ orderStatus: { $in: statuses } });
@@ -326,12 +382,12 @@ const exportOrders = async (req, res) => {
       { header: "Book Name", key: "bookName", width: 25 },
 
       {
-        header: "Received Date",
+        header: "Order Received Date",
         key: "createdAt",
         width: 15,
       },
       {
-        header: "Accepted or Rejected At",
+        header: "Accepted or Rejected Date",
         key: "acceptedOrRejectedAt",
         width: 20,
       },
@@ -403,4 +459,5 @@ module.exports = {
   createOrders,
   getTotalCountOfOrders,
   updateOrderStatus,
+  getPaginatedOrders,
 };

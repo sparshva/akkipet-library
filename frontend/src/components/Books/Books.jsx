@@ -77,13 +77,20 @@ const Books = () => {
     editors: [],
     topics: [],
   });
+
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  const navigate = useNavigate();
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) navigate("/admin/login", { replace: true });
+  }, [navigate]);
+
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-  const navigate = useNavigate();
 
   const fetchFilteredBooks = async (activeFilters, page) => {
     try {
@@ -112,10 +119,16 @@ const Books = () => {
       //   console.log("Fetched books:", response.data);
     } catch (error) {
       if (error.name === "CanceledError") {
-        console.log("Request was canceled:", error.message);
+        return;
       } else {
-        console.error("Error fetching books:", error);
         toast.error("Error fetching books");
+        if (error.response && error.response.status === 401) {
+          // Clear token
+          localStorage.removeItem("token");
+          window.alert("Login error or expired. Please login again");
+          // Redirect to login
+          window.location.href = "/admin/login";
+        }
       }
     }
   };
@@ -257,13 +270,26 @@ const Books = () => {
         {
           pending: "Uploading your file...",
           success: {
-            render() {
+            render({ data }) {
               // Set file to null after a successful upload
               setFile(null);
+              const backendMessage =
+                data?.data?.message || "Books imported successfully!";
+
               // navigate("/admin/manage/books");
-              fetchFilteredBooks();
+              fetchFilteredBooks(
+                {
+                  searchTerm: "",
+                  authors: [],
+                  publishers: [],
+                  languages: [],
+                  editors: [],
+                  topics: [],
+                },
+                1
+              );
               fetchCategories();
-              return "Books imported successfully!";
+              return backendMessage;
             },
           },
           error: "Error importing books",
@@ -271,7 +297,14 @@ const Books = () => {
       );
     } catch (error) {
       console.error("Error uploading file:", error);
-      alert("Error importing books");
+      toast.error("Error importing books");
+      if (error.response && error.response.status === 401) {
+        // Clear token
+        localStorage.removeItem("token");
+        window.alert("Login error or expired. Please login again");
+        // Redirect to login
+        window.location.href = "/admin/login";
+      }
     }
   };
 

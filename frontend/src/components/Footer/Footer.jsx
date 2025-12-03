@@ -16,7 +16,7 @@ const Footer = () => {
         <div
           onClick={() =>
             window.open(
-              "https://www.google.com/maps/dir//Obaiah+Ln,+Akkipete,+Chickpet,+Bengaluru,+Karnataka+560053/@12.9706505,77.4894714,12z/data=!4m8!4m7!1m0!1m5!1m1!1s0x3bae16066432b615:0xf969c14fc278faef!2m2!1d77.5718066!2d12.97067?entry=ttu&g_ep=EgoyMDI0MTAyOS4wIKXMDSoASAFQAw%3D%3D",
+              "https://share.google/Mir3GHvGW9aR2EY5D",
               "_blank",
               "noopener,noreferrer"
             )

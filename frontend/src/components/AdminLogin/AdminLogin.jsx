@@ -49,7 +49,6 @@ const AdminLogin = () => {
           error: {
             render({ data }) {
               // Log the error for debugging
-              console.error("Login error:", data.response.data.message);
               window.alert(data.response.data.message || "Login failed"); // Show error message
               return data.response.data.message || "Login failed"; // Show error message in toast
             },

@@ -41,7 +41,7 @@ const loginAdmin = async (req, res) => {
         name: user.name, // Include the name in the token
       },
       process.env.JWT_SECRET, // Use a secret from your environment variables
-      { expiresIn: "30d" } // Token expires in 7 days
+      { expiresIn: "180d" } // Token expires in 7 days
     );
 
     // Respond with the token

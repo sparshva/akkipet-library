@@ -21,7 +21,7 @@ const authenticateAdmin = async (req, res, next) => {
     // Check if all required fields are present
     if (!userId || !phoneNumber || isAdmin === undefined) {
       return res
-        .status(400)
+        .status(401)
         .json({ message: "Missing required fields in token" }); // Bad Request
     }
 
@@ -30,17 +30,17 @@ const authenticateAdmin = async (req, res, next) => {
 
     // If user does not exist, respond with 404
     if (!user) {
-      return res.status(404).json({ message: "User not found" }); // User not found
+      return res.status(401).json({ message: "User not found" }); // User not found
     }
 
     // Check if the user's name matches the name in the token (optional)
     if (user.phoneNumber !== phoneNumber) {
-      return res.status(403).json({ message: "Access denied. Admins only." }); // Forbidden
+      return res.status(401).json({ message: "Access denied. Admins only." }); // Forbidden
     }
 
     // Check if the user is an admin
     if (!user.isAdmin) {
-      return res.status(403).json({ message: "Access denied. Admins only." }); // Forbidden
+      return res.status(401).json({ message: "Access denied. Admins only." }); // Forbidden
     }
 
     // Attach the user document to the request object
@@ -48,7 +48,7 @@ const authenticateAdmin = async (req, res, next) => {
     next(); // Proceed to the next middleware or route handler
   } catch (err) {
     console.error(err);
-    return res.sendStatus(403); // Forbidden - Token verification failed
+    return res.sendStatus(401); // Forbidden - Token verification failed
   }
 };
 

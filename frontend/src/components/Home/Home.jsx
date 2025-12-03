@@ -31,7 +31,7 @@ const RollingCounter = ({ total, label, Icon, colorClass, bgColorClass }) => {
 
   return (
     <div
-      className="flex items-center p-4 bg-white rounded-lg"
+      className="flex items-center p-3 bg-white rounded-lg"
       style={{
         boxShadow:
           "rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px",
@@ -123,28 +123,7 @@ const Home = () => {
         </button>
       </div>
       <div className="px-5">
-        {/* <div class="  mx-auto grid"> */}
-        {/* <!-- Cards --> */}
         <div class="grid gap-6 mb-6 sm:grid-cols-2 ">
-          {/* <!-- Card --> */}
-          {/* <div
-            class="flex items-center p-4 bg-white rounded-lg  "
-            style={{
-              boxShadow:
-                " rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px",
-            }}
-          >
-            <div class="p-3 mr-4 text-orange-500 bg-orange-100 rounded-full">
-              <LocalShippingOutlinedIcon />
-            </div>
-            <div>
-              <p class="mb-2 text-sm font-medium text-gray-600">
-                <strong>Total Orders</strong>
-              </p>
-              <p class="text-lg font-semibold text-gray-700 ">{totalOrders}</p>
-            </div>
-          </div> */}
-
           <RollingCounter
             total={totalOrders}
             label="Total Orders"
@@ -174,6 +153,33 @@ const Home = () => {
             <span className="text-[#ff1414] mx-2">★</span>
             <strong>सूचना पत्र</strong>
             <span className="text-[#ff1414] mx-2">★</span>
+          </div>
+
+          <div className="font-semibold  text-[16px] flex items-center flex-col mb-3">
+            <div className="mt-2">
+              <em>पुस्तकें केवल इन समयों में ही प्रदान की जाएंगी।</em>
+            </div>
+            <strong>सोमवार से शनिवार</strong>
+            <div className="mt-2 space-y-1">
+              <div className="flex">
+                <div className="w-24">सुबह:</div>
+                <div>
+                  <strong>7:00AM - 10:00AM</strong>
+                </div>
+              </div>
+              <div className="flex">
+                <div className="w-24">दोपहर:</div>
+                <div>
+                  <strong>3:00PM - 4:00PM</strong>
+                </div>
+              </div>
+              <div className="flex">
+                <div className="w-24">शाम:</div>
+                <div>
+                  <strong>7:00PM - 8:00PM</strong>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="font-semibold  text-[16px] mb-3">

@@ -1,4 +1,10 @@
 Options -MultiViews
 RewriteEngine On
-RewriteCond %{REQUEST_FILENAME} !-f
+
+# If file OR directory exists, serve it
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Otherwise redirect everything to index.html
 RewriteRule ^ index.html [QSA,L]
