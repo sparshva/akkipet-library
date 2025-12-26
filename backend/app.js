@@ -10,6 +10,7 @@ const userRouter = require("./routes/user.js");
 const orderRouter = require("./routes/order.js");
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
     origin: "*",

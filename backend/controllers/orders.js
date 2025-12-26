@@ -340,7 +340,7 @@ const getPaginatedOrders = async (req, res) => {
 };
 
 const exportOrders = async (req, res) => {
-  const { statuses, searchQuery } = req.body;
+  let { statuses, searchQuery } = req.body;
 
   try {
     // console.log("exportOrders", statuses);
